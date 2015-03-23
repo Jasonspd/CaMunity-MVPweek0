@@ -31,18 +31,18 @@ The project itself extends to be quite large, but for this week we will be hopin
 
 ## Goals
 
-###Minimum Goals
+####Minimum Goals
 
 1. Stripe Connect set up and functional, where users are able to pay each other safely
 2. User logins and user profiles
 
-###Extended Goals
+####Extended Goals
 
 * Creating job posts so clients can upload new jobs
 * The status of a job can be checked by both users
 
 
-###Stretch Goal
+####Stretch Goal
 * Edittable profiles for each user
 
 ------
