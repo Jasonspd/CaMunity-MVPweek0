@@ -20,7 +20,7 @@ The project itself extends to be quite large, but for this week we will be hopin
 
 ------
 
-## Components we plan on using
+## Components we will be using
 
 * Stripe Connect - to accept and transfer funds to the various users
 * Hapi.js - as a framework for our node based app
