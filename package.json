@@ -1,0 +1,19 @@
+{
+  "name": "CaMunity-MVPweek0",
+  "version": "1.0.0",
+  "description": "A platform for photographers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jasonspd/CaMunity-MVPweek0.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jasonspd/CaMunity-MVPweek0/issues"
+  },
+  "homepage": "https://github.com/Jasonspd/CaMunity-MVPweek0"
+}
