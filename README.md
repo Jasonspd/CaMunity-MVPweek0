@@ -29,9 +29,25 @@ The project itself extends to be quite large, but for this week we will be hopin
 
 ------
 
-## Plan for the week
+## Goals
 
-We believe in re-using code, but also understanding it. We hope to be writing code whilst reviewing previous code and ensuring everyone in our group understands what is going.
+###Minimum Goals
+
+1. Stripe Connect set up and functional, where users are able to pay each other safely
+2. User logins and user profiles
+
+###Extended Goals
+
+* Creating job posts so clients can upload new jobs
+* The status of a job can be checked by both users
+
+
+###Stretch Goal
+* Edittable profiles for each user
+
+------
+
+## Plan for the week
 
 Below is our first draft timetable for this week:
 
