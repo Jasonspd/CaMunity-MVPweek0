@@ -4,7 +4,12 @@ var Joi = require('joi');
 var mongojs = require('mongojs');
 var creds = require('../creds.json');
 // var db = require('./database.js');
-var stripe = require("stripe")("sk_test_stripe.setApiKey()mrtOm1IZq62ZieC4vwrQgAvU");
+var stripe = require("stripe")("sk_test_stripe.setApiKey()"+creds.stripe_testsecret_keyonly);
+var token_uri = 'https://connect.stripe.com/oauth/token';
+
+var qs = require('querystring');
+var req = require('request');
+var code;
 
 module.exports = [
 
@@ -29,16 +34,6 @@ module.exports = [
 },
 
 {
-    method: 'GET',
-    path: '/stripe',
-    config: {
-        handler: function (request, reply) {
-            reply.view('homepage');
-        }
-    }
-},
-
-{
     method: 'POST',
     path: '/stripe',
     config: {
@@ -49,7 +44,7 @@ module.exports = [
                 amount:2000,
                 currency:"gbp",
                 source: stripeToken,
-                description: "anotheremail@email.com"
+                description: "itookyourmoney@email.com"
             }, function(err, charge) {
                 if (err && err.type === 'StripeCardError') {
                     console.log("stripe error");
@@ -70,7 +65,7 @@ module.exports = [
                 return reply.redirect('/profile');
             }
             else {
-                reply.view('homepage', {link: "https://connect.stripe.com/oauth/authorize?response_type=code&client_id="+creds.stripe_client_id+"&scope=read_write"});
+                reply.view('homepage', {key: creds.stripe_testpk });
             }
         }
     }
@@ -85,7 +80,7 @@ module.exports = [
                 return reply.redirect('/profile');
             }
             else {
-                reply.view('homepage');
+                reply('Sign in to twitter for example');
             }
         }
     }
@@ -100,11 +95,79 @@ module.exports = [
                 return reply.redirect('/profile');
             }
             else {
-                reply.view('homepage');
+                console.log(request.query);
+                reply(request.query);
             }
         }
     }
 },
+
+{
+    method: 'GET',
+    path: '/authorize',
+    config: {
+        handler: function(request, reply) {
+            var auth_uri = 'https://connect.stripe.com/oauth/authorize';
+            reply.redirect(auth_uri + "?" + qs.stringify({
+                response_type: "code",
+                scope: "read_write",
+                client_id: creds.stripe_clientId
+            }));
+        }
+    }
+},
+
+// {
+//     method: 'GET',
+//     path: '/oauth',
+//     config: {
+//         handler: function(request, reply) {
+//             var code = request.query.code;
+
+//             req.post({
+//                 url: TOKEN_URI,
+//                 form: {
+//                     grant_type: 'authorization_code',
+//                     client_id: stripe_client_id,
+//                     code: code,
+//                     client_secret: stripe_testsecret
+//                 }
+//             }, function(err, r, payload) {
+
+//                 var accessToken = JSON.parse(payload).access_token;
+
+//                 reply({'Your Token' : accessToken})
+//             })
+//         }
+//     }
+// },s
+
+{
+    method: 'GET',
+    path: '/oauth',
+    config: {
+        handler: function(request, reply){
+            code = request.query.code;
+            reply.redirect('/loginsuccess');
+        }
+    }
+},
+
+{
+    method: 'GET',
+    path: '/loginsuccess',
+    config: {
+        handler: function(request, reply) {
+            reply.redirect(TOKEN_URI + qs.stringify({
+                grant_type: 'authorization_code',
+                client_id: creds.stripe_client_id,
+                code: code,
+                client_secret: creds.stripe_testsecret
+            }));
+        }
+    }
+},
+
 
 
 ];
