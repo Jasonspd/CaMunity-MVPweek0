@@ -1,18 +1,20 @@
-var Path = require('path');
 var jade = require('jade');
-var Joi = require('joi');
-var mongojs = require('mongojs');
 var creds = require('../creds.json');
-// var db = require('./database.js');
-var stripe = require("stripe")("sk_test_stripe.setApiKey()"+creds.stripe_testsecret_keyonly);
+
+var db = require('./database.js');
+var mongojs = require('mongojs');
+var Joi = require('joi');
+
+var stripe = require("stripe")(creds.stripe_testsecret)
 var token_uri = 'https://connect.stripe.com/oauth/token';
 
 var qs = require('querystring');
 var req = require('request');
-var code;
 
+//Exporting to server.js
 module.exports = [
 
+//Routing for css
 {
     method: 'GET',
     path: '/public/css/{filename}',
@@ -23,6 +25,7 @@ module.exports = [
     }
 },
 
+//Routing for jquery
 {
     method: 'GET',
     path: '/public/lib/{filename}',
@@ -33,6 +36,7 @@ module.exports = [
     }
 },
 
+//Example charge
 {
     method: 'POST',
     path: '/stripe',
@@ -56,6 +60,7 @@ module.exports = [
     }
 },
 
+//Homepage
 {
     method: 'GET',
     path: '/',
@@ -71,37 +76,81 @@ module.exports = [
     }
 },
 
+//User profile page
 {
     method: 'GET',
-    path: '/loginc',
+    path: '/profile',
     config: {
         handler: function(request, reply) {
             if(request.auth.isAuthenticated) {
                 return reply.redirect('/profile');
             }
             else {
-                reply('Sign in to twitter for example');
+                reply.view('profile');
             }
         }
     }
 },
 
+//User account page
 {
     method: 'GET',
-    path: '/loginp',
+    path: '/account',
     config: {
         handler: function(request, reply) {
             if(request.auth.isAuthenticated) {
                 return reply.redirect('/profile');
             }
             else {
-                console.log(request.query);
-                reply(request.query);
+                    reply.view('account');
             }
         }
     }
 },
 
+//User can edit their account details
+{
+    method: 'POST',
+    path: '/account',
+    config: {
+        handler: function(request, reply) {
+            if(request.auth.isAuthenticated) {
+                return reply.redirect('/profile');
+            }
+            else {
+                console.log("are we getting post request");
+                var title = request.payload.title;
+                var summary = request.payload.summary;
+                var price = request.payload.price;
+
+                db.addJob(title, summary, price, function(err, data) {
+                    console.log("is it displaying account page");
+                    reply.view('account');
+                })
+            }
+        }
+    }
+},
+
+//Page to view all job posts
+{
+    method: 'GET',
+    path: '/jobs',
+    config: {
+        handler: function(request, reply) {
+            if(request.auth.isAuthenticated) {
+                return reply.redirect('/login');
+            }
+            else {
+                db.getAllJobs(function (err, data) {
+                    reply.view('jobs', {jobs: "data"} );
+                });
+            }
+        }
+    }
+},
+
+//Directs user to stripe login page
 {
     method: 'GET',
     path: '/authorize',
@@ -117,57 +166,35 @@ module.exports = [
     }
 },
 
-// {
-//     method: 'GET',
-//     path: '/oauth',
-//     config: {
-//         handler: function(request, reply) {
-//             var code = request.query.code;
-
-//             req.post({
-//                 url: TOKEN_URI,
-//                 form: {
-//                     grant_type: 'authorization_code',
-//                     client_id: stripe_client_id,
-//                     code: code,
-//                     client_secret: stripe_testsecret
-//                 }
-//             }, function(err, r, payload) {
-
-//                 var accessToken = JSON.parse(payload).access_token;
-
-//                 reply({'Your Token' : accessToken})
-//             })
-//         }
-//     }
-// },s
-
+//Callback route after users stripe account is created/logged in
+//Uses access token to POST to stripe API, then retrieve users stripe account details
 {
     method: 'GET',
     path: '/oauth',
     config: {
         handler: function(request, reply){
-            code = request.query.code;
-            reply.redirect('/loginsuccess');
+            var code = request.query.code;
+            req.post({
+                url: token_uri,
+                form: {
+                    grant_type: 'authorization_code',
+                    client_id: creds.stripe_clientid,
+                    code: code,
+                    client_secret: creds.stripe_testsecret
+                }
+            }, function(err, r, body) {
+                var userdetails = JSON.parse(body);
+
+//Creating the customers
+                stripe.customers.create(
+                    {description: "example@stripe.com"},
+                    {stripe_account: userdetails.stripe_user_id}
+                    );
+
+                reply(userdetails + body);
+            });
         }
     }
 },
-
-{
-    method: 'GET',
-    path: '/loginsuccess',
-    config: {
-        handler: function(request, reply) {
-            reply.redirect(TOKEN_URI + qs.stringify({
-                grant_type: 'authorization_code',
-                client_id: creds.stripe_client_id,
-                code: code,
-                client_secret: creds.stripe_testsecret
-            }));
-        }
-    }
-},
-
-
 
 ];
