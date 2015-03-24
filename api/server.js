@@ -1,9 +1,12 @@
 var Hapi = require('hapi');
 var server = new Hapi.Server();
-var Path = require('path');
-var Joi = require('joi');
+
 var Bell = require('bell');
 var AuthCookie = require('hapi-auth-cookie');
+
+var Path = require('path');
+var Joi = require('joi');
+
 var routes = require('./routes.js');
 
 /* $lab:coverage:off$ */
@@ -13,6 +16,7 @@ server.connection({
 });
 /* $lab:coverage:on$ */
 
+//Setting view engine and views directory
 server.views({
         engines: {
             jade: require('jade')
@@ -52,4 +56,5 @@ server.route(routes);
 //     server.route(routes);
 // });
 
+//Exporting to app.js
 module.exports = server;
