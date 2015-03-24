@@ -15,5 +15,20 @@
   "bugs": {
     "url": "https://github.com/Jasonspd/CaMunity-MVPweek0/issues"
   },
-  "homepage": "https://github.com/Jasonspd/CaMunity-MVPweek0"
+  "homepage": "https://github.com/Jasonspd/CaMunity-MVPweek0",
+  "devDependencies": {
+    "chai": "^2.1.2",
+    "gulp": "^3.8.11",
+    "gulp-lab": "^1.0.4",
+    "lab": "^5.5.0"
+  },
+  "dependencies": {
+    "bell": "^2.2.0",
+    "hapi": "^8.4.0",
+    "hapi-auth-cookie": "^2.0.0",
+    "jade": "^1.9.2",
+    "joi": "^6.0.8",
+    "mongojs": "^0.18.2",
+    "stripe": "^3.3.2"
+  }
 }
