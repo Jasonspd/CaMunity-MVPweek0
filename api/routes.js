@@ -1,6 +1,7 @@
 var Path = require('path');
 var jade = require('jade');
 var Joi = require('joi');
+var Bell = require('bell');
 var mongojs = require('mongojs');
 var creds = require('../creds.json');
 // var db = require('./database.js');
@@ -107,4 +108,39 @@ module.exports = [
 },
 
 
+
+
+
+
+// AUTHENTICATION ROUTES
+
+// {
+//     method: 'GET',
+//     path: '/login',
+//     config: {
+//         auth: 'twitter',
+//         handler: function (request, reply) {
+//             if (true) {
+//                 request.auth.session.clear();
+//                 request.auth.session.set(request.auth.credentials);
+//                 return reply.redirect('/');
+//             }
+//             reply('Not logged in...').code(401);    
+//         }
+//     }
+// },
+
+// {
+//     method: 'GET',
+//     path: '/logout',
+//     config: {
+//         // auth: false,
+//         handler: function (request, reply) {
+//             request.auth.session.clear();
+//             reply.redirect('/');
+//         }
+//     }
+// },
+
+        
 ];

@@ -5,11 +5,12 @@ var Joi = require('joi');
 var Bell = require('bell');
 var AuthCookie = require('hapi-auth-cookie');
 var routes = require('./routes.js');
+var creds = require('../creds.json');
 
 /* $lab:coverage:off$ */
 server.connection({
     host: 'localhost',
-    port: process.env.PORT || 8080
+    port: process.env.PORT || 9000
 });
 /* $lab:coverage:on$ */
 
@@ -22,8 +23,13 @@ server.views({
 
 server.route(routes);
 
+
+
+
+
+//TWITTER AUTH
+
 // server.register([Bell, AuthCookie], function (err) {
-    
 //     if (err) {
 //         console.error(err);
 //         return process.exit(1);
@@ -31,25 +37,24 @@ server.route(routes);
 
 //     var authCookieOptions = {
 //         password: 'cookie-encryption-password',
-//         cookie: 'twitter-auth',
+//         cookie: 'camunity-auth',
 //         isSecure: false
 //     };
-
-//     server.auth.strategy('twitter-cookie', 'cookie', authCookieOptions);
+//     server.auth.strategy('camunity-cookie', 'cookie', authCookieOptions);
     
 //     var bellAuthOptions = {
 //         provider: 'twitter',
 //         password: 'twitter-encryption-password',
-//         clientId: creds.clientId,
-//         clientSecret: creds.clientSecret,
+//         clientId: creds.twitter_clientId,
+//         clientSecret: creds.twitter_clientSecret,
 //         isSecure: false
 //     };
-
 //     server.auth.strategy('twitter-oauth', 'bell', bellAuthOptions);
 
 //     server.auth.default('camunity-cookie');
 
 //     server.route(routes);
 // });
+
 
 module.exports = server;
