@@ -3,30 +3,20 @@ var assert 	= require('chai').assert;
 var server 	= require('../api/server.js');
 
 
-// JASONS FIRST TEST
-lab.experiment("When...", function() {
+// TESTING THE HOMEPAGE
+lab.experiment("When a user visits our homepage", function() {
 	var options = {
 		url: '/',
 		method: 'GET'
 	};
-	lab.test("Return...", function(done) {
+	lab.test("it should exist", function(done) {
 		server.inject(options, function(response) {
-			assert.equal(response.statusCode, 200, 'it should...');
+			assert.equal(response.statusCode, 200, 'it should exist and return status code 200');
 			done();
 		});
 	});
-});
 
-
-
-// TESTING THE HOMEPAGE
-lab.experiment("When a user visits our homepage", function() {
-
-	lab.test("it should exist", function(done) {
-
-	});
-
-	lab.test("it should any images we have on our page", function(done) {
+	lab.test("it should load any images we have on our page", function(done) {
 
 	});
 
