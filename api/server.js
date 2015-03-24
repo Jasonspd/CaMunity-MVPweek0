@@ -9,7 +9,7 @@ var routes = require('./routes.js');
 /* $lab:coverage:off$ */
 server.connection({
     host: 'localhost',
-    port: process.env.PORT || 8080
+    port: process.env.PORT || 9000
 });
 /* $lab:coverage:on$ */
 
