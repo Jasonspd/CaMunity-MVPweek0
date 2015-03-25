@@ -123,7 +123,7 @@ module.exports = [
             auth: 'camunity-cookie',
             handler: function(request, reply) {
                 db.getAllJobs(function (err, data) {
-                    reply.view('jobs', {jobs: "data"} );
+                    reply.view('jobs', {jobs: data} );
                 });
             }
         }

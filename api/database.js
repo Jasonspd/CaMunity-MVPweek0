@@ -43,7 +43,7 @@ function job(title, summary, price, dateAdded) {
 }
 
 function addJob(title, summary, price, callback) {
-	console.log("is it running function?")
+	console.log("is it running function?");
 	var newJob = new job(title, summary, price);
 	db.user.save(newJob, function (err, data) {
 		if (err) {
