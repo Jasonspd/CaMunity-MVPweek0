@@ -214,7 +214,7 @@ module.exports = [
         handler: function(request, reply) {
             var stripeToken = request.payload.stripeToken;
             db.addToken(stripeToken, function(err, data) {
-                reply.('Your details have been saved. Payment is only charged when the job is completed');
+                reply('Your details have been saved. Payment is only charged when the job is completed');
             });
         }
     }
