@@ -59,7 +59,14 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                reply.view('profile');
+                var d = request.auth.credentials;
+                var dname = d.displayname;
+                var first = d.firstname;
+                var last = d.lastname;
+                var email = d.email;
+                var link = d.link;
+                var picture = d.picture;
+                reply.view('profile', {dname: dname, first: first, last: last, email: email, link: link, picture: picture});
             }
         }
     },
@@ -67,7 +74,7 @@ module.exports = [
 //User account page
     {
         method: 'GET',
-        path: '/account',
+        path: '/account',   
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
@@ -87,10 +94,11 @@ module.exports = [
                     var title = request.payload.title;
                     var summary = request.payload.summary;
                     var price = request.payload.price;
+                    var client = request.auth.credentials.displayname;
 
-                    db.addJob(title, summary, price, function(err, data) {
+                    db.addJob(title, summary, price, client, function(err, data) {
                         console.log("is it displaying account page");
-                        reply.view('account');
+                        reply.redirect('/jobs');
                     });
             }
         }
@@ -103,14 +111,24 @@ module.exports = [
         config: {
             auth: 'google',
             handler: function (request, reply) {
-                var g = request.auth.credentials;
+                var g = request.auth.credentials.profile;
+                console.log(g);
                 var profile = {
-                    name: g.profile.displayName,
-                    email: g.profile.email,
-                    picture: g.profile.raw.picture,
+                    id: g.id,
+                    username: g.username,
+                    displayname: g.displayName,
+                    firstname: g.name.first,
+                    lastname: g.name.last,
+                    email: g.email,
+                    link: g.raw.link,
+                    picture: g.raw.picture,
+                    gender: g.raw.male
                 };
                 request.auth.session.set(profile);
-                reply.redirect('/');
+                db.addDetails(profile.id, profile.username, profile.displayname, profile.firstname, profile.lastname, profile.email, profile.link, profile.picture, profile.gender,
+                function(err, data) {
+                    reply.redirect('/profile');
+                })
             }
         }    
     },
@@ -123,7 +141,7 @@ module.exports = [
             auth: 'camunity-cookie',
             handler: function(request, reply) {
                 db.getAllJobs(function (err, data) {
-                    reply.view('jobs', {jobs: "data"} );
+                    reply.view('jobs', {jobs: data} );
                 });
             }
         }
@@ -168,31 +186,6 @@ module.exports = [
             }
         }
     },
-
-
-//webhooks
-// {
-//     method: 'POST',
-//     path: '/my/mywebhook/url',
-//     config: {
-//         handler: function(request, reply) {
-//             var event_json = JSON.parse(request.payload);
-//             console.log("An event has happened: " + event_json);
-//             reply(200);
-//         }
-//     }
-// },
-
-// {
-//     method: 'GET',
-//     path: '/my/mywebhook/url',
-//     config: {
-//         handler: function(request, reply) {
-//             console.log("something has happened");
-//             reply(200);
-//         }
-//     }
-// },
 
 //Status page allowing client to enter credit card details and complete payment
 {
@@ -244,6 +237,30 @@ module.exports = [
         }
     }
 },
+
+//webhooks
+// {
+//     method: 'POST',
+//     path: '/my/mywebhook/url',
+//     config: {
+//         handler: function(request, reply) {
+//             var event_json = JSON.parse(request.payload);
+//             console.log("An event has happened: " + event_json);
+//             reply(200);
+//         }
+//     }
+// },
+
+// {
+//     method: 'GET',
+//     path: '/my/mywebhook/url',
+//     config: {
+//         handler: function(request, reply) {
+//             console.log("something has happened");
+//             reply(200);
+//         }
+//     }
+// },
 
 
 ];
