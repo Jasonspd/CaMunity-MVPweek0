@@ -102,7 +102,7 @@ module.exports = [
                 return reply.redirect('/profile');
             }
             else {
-                    reply.view('account');
+                    reply.view('account', {title: "Your Account"});
             }
         }
     }
@@ -196,5 +196,78 @@ module.exports = [
         }
     }
 },
+
+//webhooks
+{
+    method: 'POST',
+    path: '/my/mywebhook/url',
+    config: {
+        handler: function(request, reply) {
+            var event_json = JSON.parse(request.payload);
+            console.log("An event has happened: " + event_json);
+            reply(200);
+        }
+    }
+},
+
+{
+    method: 'GET',
+    path: '/my/mywebhook/url',
+    config: {
+        handler: function(request, reply) {
+            console.log("something has happened");
+            reply(200);
+        }
+    }
+},
+
+{
+    method: 'GET',
+    path: '/status',
+    config: {
+        handler: function(request, reply) {
+            reply.view('status', {key: creds.stripe_testpk});
+        }
+    }
+},
+
+{
+    method: 'POST',
+    path: '/status',
+    config: {
+        handler: function(request, reply) {
+            var stripeToken = request.payload.stripeToken;
+            db.addToken(stripeToken, function(err, data) {
+                reply.view('status', {key: creds.stripe_testpk});
+            });
+        }
+    }
+},
+
+{
+    method: 'POST',
+    path: '/jobcompleted',
+    config: {
+        handler: function(request, reply) {
+            db.getToken(function(err, data) {
+
+            var charge = stripe.charges.create({
+                amount:10000,
+                currency:"gbp",
+                source: data.stripetoken,
+                destination: "acct_15juWJIQ7u0M1Wf0"
+            }, function(err, charge) {
+                if (err && err.type === 'StripeCardError') {
+                    console.log("stripe error");
+                }
+            reply('Job completed')
+            });
+
+            });
+        }
+    }
+},
+
+
 
 ];

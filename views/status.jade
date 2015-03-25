@@ -1,0 +1,11 @@
+extend layout
+
+block content
+	h1 Status
+	.div 
+		form(action="/status" method="POST")
+			script.stripe-button(src="https://checkout.stripe.com/checkout.js", data-key='#{key}', data-amount='5000', data-name='Pay photographer', data-description='For 2 hours of work')
+	hr
+	.div
+		form(action="/jobcompleted" method="POST")
+			input.btn.btn-default(type='submit', value = 'Job Completed')

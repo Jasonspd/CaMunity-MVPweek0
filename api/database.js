@@ -1,7 +1,7 @@
 var mongojs = require("mongojs");
 var creds = require("../creds.json");
 // var db = mongojs("mylocaldatabase", ['user']);
-var db = mongojs(creds.dbname + ":" + creds.dbpwd + creds.dburl, ['user']);
+var db = mongojs(creds.dbname + ":" + creds.dbpwd + creds.dburl, ['user', 'tokens']);
 
 db.on('error',function(err) {
     console.log('database error', err);
@@ -68,7 +68,41 @@ function getAllJobs(callback) {
 	});
 }
 
+function token(stripetoken, dateAdded) {
+	this.stripetoken = stripetoken;
+	this.dateAdded = new Date();
+}
+
+function addToken(stripetoken, callback) {
+	console.log("Token is about to be added to the database");
+	var newToken = new token(stripetoken);
+	db.tokens.save(newToken, function (err, data) {
+		if (err) {
+			return callback(err, null);
+		}
+		else {
+			console.log('Token saved: ', data);
+			return callback(null, data);
+		}
+	});
+}
+
+function getToken(callback) {
+	console.log("Token about to be found from database");
+	db.tokens.findOne( {stripetoken: "tok_15kFxEBgUq50mWzrm8xofax8"}, function (err, data) {
+		if (err) {
+			return callback(err, null);
+		}
+		else {
+			console.log("Actually found token");
+			return callback(null, data);
+		}
+	});
+}
+
 module.exports = {
+	getToken: getToken,
+	addToken: addToken,
 	addDetails: addDetails,
 	addJob: addJob,
 	getAllJobs: getAllJobs
