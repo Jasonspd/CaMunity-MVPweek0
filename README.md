@@ -38,12 +38,14 @@ The project itself extends to be quite large, but for this week we will be hopin
 
 ####Extended Goals
 
-* Creating job posts so clients can upload new jobs
-* The status of a job can be checked by both users
+3. Job posts section so clients can upload jobs that they require a photographer for
+4. The status of a job can be checked by both users
+5. Ability to review a user and give him/her a rating
 
 
-####Stretch Goal
-* Edittable profiles for each user
+####Stretch Goals
+6. Edittable profiles for each user
+7. Messaging between the users (*super stretch goal* would be to use SocketIO)
 
 ------
 

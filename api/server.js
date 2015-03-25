@@ -2,12 +2,14 @@ var Hapi = require('hapi');
 var server = new Hapi.Server();
 
 var Bell = require('bell');
+var Boom = require('boom');
 var AuthCookie = require('hapi-auth-cookie');
 
 var Path = require('path');
 var Joi = require('joi');
 
 var routes = require('./routes.js');
+var creds = require('../creds.json');
 
 /* $lab:coverage:off$ */
 server.connection({
@@ -24,37 +26,40 @@ server.views({
         path: Path.join(__dirname, '../views')
     });
 
+
+
+
+// GOOGLE AUTHNENTICATION ATTEMPT
+server.register([Bell, AuthCookie], function(err) {
+	if (err) {
+		console.error(err);
+		return process.exit(1);
+	}
+	var authCookieOptions = {
+		password: 'cookie-password',
+		cookie: 'camunity-auth',
+		isSecure: false
+	};
+	server.auth.strategy('camunity-cookie', 'cookie', authCookieOptions);
+
+	var bellAuthOptions = {
+		provider: 'google',
+		password: 'google-encryption-password',
+		clientId: creds.google_clientId,
+		clientSecret: creds.google_clientSecret,
+		isSecure: false,
+		providerParams: {
+			redirectUri : 'http://localhost:9000/login'
+		} 
+	};
+
+server.auth.strategy('google', 'bell', bellAuthOptions);
+
+server.auth.default('camunity-cookie');
+   
 server.route(routes);
 
-// server.register([Bell, AuthCookie], function (err) {
-    
-//     if (err) {
-//         console.error(err);
-//         return process.exit(1);
-//     }
-
-//     var authCookieOptions = {
-//         password: 'cookie-encryption-password',
-//         cookie: 'twitter-auth',
-//         isSecure: false
-//     };
-
-//     server.auth.strategy('twitter-cookie', 'cookie', authCookieOptions);
-    
-//     var bellAuthOptions = {
-//         provider: 'twitter',
-//         password: 'twitter-encryption-password',
-//         clientId: creds.clientId,
-//         clientSecret: creds.clientSecret,
-//         isSecure: false
-//     };
-
-//     server.auth.strategy('twitter-oauth', 'bell', bellAuthOptions);
-
-//     server.auth.default('camunity-cookie');
-
-//     server.route(routes);
-// });
+});
 
 //Exporting to app.js
 module.exports = server;
