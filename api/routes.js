@@ -34,7 +34,7 @@ module.exports = [
         method: 'GET',
         path: '/stripe',
         config: {
-            auth: 'google',
+            auth: 'camunity-cookie',
             handler: function (request, reply) {
                 reply.view('homepage');
             }
@@ -45,14 +45,9 @@ module.exports = [
     {
         method: 'GET',
         path: '/',
-        config: {
+        config: {auth: {mode: 'optional'},
             handler: function(request, reply) {
-                if(request.auth.isAuthenticated) {
-                    return reply.redirect('/profile');
-                }
-                else {
-                    reply.view('homepage', {key: creds.stripe_testpk });
-                }
+                reply.view('homepage', {key: creds.stripe_testpk });
             }
         }
     },
@@ -62,10 +57,9 @@ module.exports = [
         method: 'GET',
         path: '/profile',
         config: {
+            auth: 'camunity-cookie',
             handler: function(request, reply) {
-                if(request.auth.isAuthenticated) {
-                    return reply.redirect('/profile');
-                }
+                reply.view('profile');
             }
         }
     },
@@ -75,13 +69,9 @@ module.exports = [
         method: 'GET',
         path: '/account',
         config: {
+            auth: 'camunity-cookie',
             handler: function(request, reply) {
-                if(request.auth.isAuthenticated) {
-                    return reply.redirect('/profile');
-                }
-                else {
-                        reply.view('account');
-                }
+                reply.view('account');
             }
         }
     },
@@ -91,11 +81,8 @@ module.exports = [
         method: 'POST',
         path: '/account',
         config: {
+            auth: 'camunity-cookie',
             handler: function(request, reply) {
-                if(request.auth.isAuthenticated) {
-                    return reply.redirect('/profile');
-                }
-                else {
                     console.log("are we getting post request");
                     var title = request.payload.title;
                     var summary = request.payload.summary;
@@ -105,7 +92,6 @@ module.exports = [
                         console.log("is it displaying account page");
                         reply.view('account');
                     });
-                }
             }
         }
     },
@@ -123,14 +109,8 @@ module.exports = [
                     email: g.profile.email,
                     picture: g.profile.raw.picture,
                 };
-                // if (true) {
-                    // request.auth.session.clear();
                 request.auth.session.set(profile);
-                return reply.redirect('/');
-                // }
-                // else {
-                //  reply('You're not logged in pal!');    
-                // }
+                reply.redirect('/');
             }
         }    
     },
@@ -140,15 +120,11 @@ module.exports = [
         method: 'GET',
         path: '/jobs',
         config: {
+            auth: 'camunity-cookie',
             handler: function(request, reply) {
-                if(request.auth.isAuthenticated) {
-                    return reply.redirect('/login');
-                }
-                else {
-                    db.getAllJobs(function (err, data) {
-                        reply.view('jobs', {jobs: "data"} );
-                    });
-                }
+                db.getAllJobs(function (err, data) {
+                    reply.view('jobs', {jobs: "data"} );
+                });
             }
         }
     },
@@ -157,7 +133,7 @@ module.exports = [
     {
         method: 'GET',
         path: '/authorize',
-        config: {
+        config: {auth: {mode: 'optional'},
             handler: function(request, reply) {
                 var auth_uri = 'https://connect.stripe.com/oauth/authorize';
                 reply.redirect(auth_uri + "?" + qs.stringify({
@@ -174,19 +150,20 @@ module.exports = [
     {
         method: 'GET',
         path: '/oauth',
-        config: {
+        config: {auth: {mode: 'optional'},
             handler: function(request, reply){
                 var code = request.query.code;
                 req.post({
                     url: token_uri,
                     form: {
                         grant_type: 'authorization_code',
-                        client_id: creds.stripe_clientid,
+                        client_id: creds.stripe_clientId,
                         code: code,
                         client_secret: creds.stripe_testsecret
                     }
                 }, function(err, r, body) {
                     var userdetails = JSON.parse(body);
+                    reply(body);
                 });
             }
         }
