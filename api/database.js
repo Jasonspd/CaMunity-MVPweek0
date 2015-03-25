@@ -1,7 +1,7 @@
 var mongojs = require("mongojs");
 var creds = require("../creds.json");
 // var db = mongojs("mylocaldatabase", ['user']);
-var db = mongojs(creds.dbname + ":" + creds.dbpwd + creds.dburl, ['user', 'tokens']);
+var db = mongojs(creds.dbname + ":" + creds.dbpwd + creds.dburl, ['users', 'tokens', 'jobs']);
 
 db.on('error',function(err) {
     console.log('database error', err);
@@ -11,19 +11,22 @@ db.on('ready',function() {
     console.log('database connected');
 });
 
-function user(username, email, firstname, lastname, summary, website) {
+function user(id, username, displayname, firstname, lastname, email, link, picture, gender) {
+	this.id = id;
 	this.username = username;
-	this.email = email;
+	this.displayname = displayname;
 	this.firstname = firstname;
 	this.lastname = lastname;
-	this.summary = summary;
-	this.website = website;
+	this.email = email;
+	this.link = link;
+	this.picture = picture;
+	this.gender = gender;
 	this.datejoined = new Date();
 }
 
-function addDetails(username, email, firstname, lastname, summary, website, callback) {
-	var newUser = new user(username, email, firstname, lastname, summary, website);
-	db.user.save(newUser, function (err,data){
+function addDetails(id, username, displayname, firstname, lastname, email, link, picture, gender, callback) {
+	var newUser = new user(id, username, displayname, firstname, lastname, email, link, picture, gender);
+	db.users.save(newUser, function (err,data){
 		if (err) {
 			return callback(err, null);
 		}
@@ -35,17 +38,17 @@ function addDetails(username, email, firstname, lastname, summary, website, call
 }
 
 
-function job(title, summary, price, dateAdded) {
+function job(title, summary, price, client, dateAdded) {
 	this.title = title;
 	this.summary = summary;
 	this.price = price;
+	this.client = client;
 	this.dateAdded = new Date();
 }
 
-function addJob(title, summary, price, callback) {
-	console.log("is it running function?")
-	var newJob = new job(title, summary, price);
-	db.user.save(newJob, function (err, data) {
+function addJob(title, summary, price, client, callback) {
+	var newJob = new job(title, summary, price, client);
+	db.jobs.save(newJob, function (err, data) {
 		if (err) {
 			return callback(err, null);
 		}
@@ -57,7 +60,7 @@ function addJob(title, summary, price, callback) {
 }
 
 function getAllJobs(callback) {
-	db.user.find(function (err, data) {
+	db.jobs.find(function (err, data) {
 		if (err) {
 			return callback(err, null);
 		}
