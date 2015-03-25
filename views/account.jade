@@ -1,0 +1,30 @@
+extend layout
+
+block content
+	h1 Your account
+	hr
+	h3 Edit your profile details
+	form.form-editdetails
+		.form-group
+			label Firstname:
+				input(type="text")
+		.form-group
+			label Lastname:
+				input(type="text")
+		.form-group
+			label Website:
+				input(type="text")
+		.form-group
+			label Summary:
+				input(type="text")
+	hr
+	h3 Create a job post
+	form.form-createjobpost(action='/account', role='form', method='POST')
+		.form-group
+			label Job title:
+				input(type="text", name='title')
+		.form-group
+			label Summary:
+				input(type="text", name='summary')
+		.form-group
+			input.btn.btn-default(type='submit', value='Add job')

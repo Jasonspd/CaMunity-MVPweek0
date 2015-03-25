@@ -1,7 +1,7 @@
 var mongojs = require("mongojs");
 var creds = require("../creds.json");
-var db = mongojs("mylocaldatabase", ['user']);
-// var db = mongojs(creds.dbname + ":" + creds.dbpwd + creds.dburl, ['user']);
+// var db = mongojs("mylocaldatabase", ['user']);
+var db = mongojs(creds.dbname + ":" + creds.dbpwd + creds.dburl, ['user']);
 
 db.on('error',function(err) {
     console.log('database error', err);
@@ -35,16 +35,17 @@ function addDetails(username, email, firstname, lastname, summary, website, call
 }
 
 
-function job(title, summary, cost, dateAdded) {
+function job(title, summary, price, dateAdded) {
 	this.title = title;
 	this.summary = summary;
-	this.cost = cost;
+	this.price = price;
 	this.dateAdded = new Date();
 }
 
-function addJob(title, summary, cost, callback) {
-	var newJob = new job(title, summary, cost);
-	db.job.save(newJob, function (err, data) {
+function addJob(title, summary, price, callback) {
+	console.log("is it running function?")
+	var newJob = new job(title, summary, price);
+	db.user.save(newJob, function (err, data) {
 		if (err) {
 			return callback(err, null);
 		}
@@ -56,7 +57,7 @@ function addJob(title, summary, cost, callback) {
 }
 
 function getAllJobs(callback) {
-	db.job.find(function (err, data) {
+	db.user.find(function (err, data) {
 		if (err) {
 			return callback(err, null);
 		}

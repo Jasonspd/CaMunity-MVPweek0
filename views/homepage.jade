@@ -2,11 +2,16 @@ extend layout
 
 block content
 	h1 Homepage
-	a(href='/loginc') Client
-	hr
-	a(href='/loginp') Photographer
+	.div 
+		a.btn.btn-default(href='/loginc') Client
+	.div 
+		a.btn.btn-default(href='/loginp') Photographer
 	hr
 
-	a(href='#{link}') Client
+	h3 Photographers: Get paid!
+	a(href='/authorize') Photographer
+
 	hr
-	a(href='#{link}') Photographer
+	h3 We welcome any donations
+	form(action="/stripe" method="POST")
+		script.stripe-button(src="https://checkout.stripe.com/checkout.js", data-key='#{key}', data-amount='2000', data-name='Pay me', data-description='£20 donation')

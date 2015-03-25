@@ -2,9 +2,9 @@
   "name": "CaMunity-MVPweek0",
   "version": "1.0.0",
   "description": "A platform for photographers",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "lab -c -v"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,8 @@
     "jade": "^1.9.2",
     "joi": "^6.0.8",
     "mongojs": "^0.18.2",
+    "querystring": "^0.2.0",
+    "request": "^2.53.0",
     "stripe": "^3.3.2"
   }
 }
