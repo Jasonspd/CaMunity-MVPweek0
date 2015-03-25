@@ -171,33 +171,35 @@ module.exports = [
 
 
 //webhooks
-{
-    method: 'POST',
-    path: '/my/mywebhook/url',
-    config: {
-        handler: function(request, reply) {
-            var event_json = JSON.parse(request.payload);
-            console.log("An event has happened: " + event_json);
-            reply(200);
-        }
-    }
-},
+// {
+//     method: 'POST',
+//     path: '/my/mywebhook/url',
+//     config: {
+//         handler: function(request, reply) {
+//             var event_json = JSON.parse(request.payload);
+//             console.log("An event has happened: " + event_json);
+//             reply(200);
+//         }
+//     }
+// },
 
-{
-    method: 'GET',
-    path: '/my/mywebhook/url',
-    config: {
-        handler: function(request, reply) {
-            console.log("something has happened");
-            reply(200);
-        }
-    }
-},
+// {
+//     method: 'GET',
+//     path: '/my/mywebhook/url',
+//     config: {
+//         handler: function(request, reply) {
+//             console.log("something has happened");
+//             reply(200);
+//         }
+//     }
+// },
 
+//Status page allowing client to enter credit card details and complete payment
 {
     method: 'GET',
     path: '/status',
     config: {
+        auth: 'camunity-cookie',
         handler: function(request, reply) {
             reply.view('status', {key: creds.stripe_testpk});
         }
@@ -208,10 +210,11 @@ module.exports = [
     method: 'POST',
     path: '/status',
     config: {
+        auth: 'camunity-cookie',
         handler: function(request, reply) {
             var stripeToken = request.payload.stripeToken;
             db.addToken(stripeToken, function(err, data) {
-                reply.view('status', {key: creds.stripe_testpk});
+                reply.('Your details have been saved. Payment is only charged when the job is completed');
             });
         }
     }
@@ -221,6 +224,7 @@ module.exports = [
     method: 'POST',
     path: '/jobcompleted',
     config: {
+        auth: 'camunity-cookie',
         handler: function(request, reply) {
             db.getToken(function(err, data) {
 
@@ -240,7 +244,6 @@ module.exports = [
         }
     }
 },
-
 
 
 ];
