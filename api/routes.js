@@ -86,7 +86,7 @@ module.exports = [
                 return reply.redirect('/profile');
             }
             else {
-                reply.view('profile');
+                reply.view('homepage');
             }
         }
     }
