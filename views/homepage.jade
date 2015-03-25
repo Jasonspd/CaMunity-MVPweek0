@@ -3,13 +3,23 @@ extend layout
 block content
 	h1 CAMUNITY
 	.div 
-		a.btn.btn-default(href='/login') Client
+		a.btn.btn-default(href='/login') Login as Client
 	.div 
-		a.btn.btn-default(href='/login') Photographer
+		a.btn.btn-default(href='/login') Login as Photographer
+
+	hr
+
+	.div 
+		a.btn.btn-default(href='/profile') Profile
+	.div 
+		a.btn.btn-default(href='/account') Account
+	.div 
+		a.btn.btn-default(href='/jobs') Jobs
+		
 	hr
 
 	h3 Photographers: Get paid!
-	a(href='/authorize') Photographer
+	a.btn.btn-default(href='/authorize') Login on stripe
 
 	hr
 	h3 We welcome any donations
