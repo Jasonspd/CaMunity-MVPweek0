@@ -9,6 +9,7 @@ lab.experiment("When a user visits our homepage", function() {
 		url: '/',
 		method: 'GET'
 	};
+	
 	lab.test("it should exist", function(done) {
 		server.inject(options, function(response) {
 			assert.equal(response.statusCode, 200, 'it should exist and return status code 200');
@@ -53,9 +54,16 @@ lab.experiment("When a user has logged in", function() {
 
 // TESTING THE PROFILE PAGE
 lab.experiment("When a user visits their personal profile page", function() {
+	var options = {
+		url: '/profile',
+		method: 'GET'
+	};
 
 	lab.test("it should exist", function(done){
-
+		server.inject(options, function(response) {
+			assert.equal(response.statusCode, 200, 'it should exist and return status code 200');
+			done();
+		});
 	});
 
 	lab.test("it should be populated using twitter information", function(done){
@@ -133,6 +141,17 @@ lab.experiment("When a Client user visits their personal profile page", function
 
 // TESTING THE JOB POSTS PAGE
 lab.experiment("When a user visits the job posts page", function() {
+	var options = {
+		url: '/jobposts',
+		method: 'GET'
+	};
+
+	lab.test("it should exist", function(done){
+		server.inject(options, function(response) {
+			assert.equal(response.statusCode, 200, 'it should exist and return status code 200');
+			done();
+		});
+	});
 
 	lab.test("it should display all jobs all Client users have posted", function(done){
 
