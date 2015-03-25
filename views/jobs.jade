@@ -10,5 +10,5 @@ block content
 	if jobs
 		each job in jobs
 			.panel.panel-primary
-							.panel-heading #{job.title} | Written by: 
-							.panel-body #{job.summary}
+							.panel-heading Title: #{job.title} | Pay: £#{job.price} | Written by: #{job.client}
+							.panel-body Summary: #{job.summary}
