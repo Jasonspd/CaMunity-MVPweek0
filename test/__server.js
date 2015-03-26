@@ -2,7 +2,6 @@ var lab 	= exports.lab = require('lab').script();
 var assert 	= require('chai').assert;
 var server 	= require('../api/server.js');
 
-
 // TESTING THE HOMEPAGE
 lab.experiment("When a user visits our homepage", function() {
 	var options = {

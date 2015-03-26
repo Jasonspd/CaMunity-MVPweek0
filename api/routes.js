@@ -59,7 +59,14 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                reply.view('profile');
+                var d = request.auth.credentials;
+                var dname = d.displayname;
+                var first = d.firstname;
+                var last = d.lastname;
+                var email = d.email;
+                var link = d.link;
+                var picture = d.picture;
+                reply.view('profile', {dname: dname, first: first, last: last, email: email, link: link, picture: picture});
             }
         }
     },
@@ -67,7 +74,7 @@ module.exports = [
 //User account page
     {
         method: 'GET',
-        path: '/account',
+        path: '/account',   
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
@@ -83,14 +90,13 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                    console.log("are we getting post request");
                     var title = request.payload.title;
                     var summary = request.payload.summary;
                     var price = request.payload.price;
+                    var client = request.auth.credentials.displayname;
 
-                    db.addJob(title, summary, price, function(err, data) {
-                        console.log("is it displaying account page");
-                        reply.view('account');
+                    db.addJob(title, summary, price, client, function(err, data) {
+                        reply.redirect('/jobs');
                     });
             }
         }
@@ -103,14 +109,23 @@ module.exports = [
         config: {
             auth: 'google',
             handler: function (request, reply) {
-                var g = request.auth.credentials;
+                var g = request.auth.credentials.profile;
                 var profile = {
-                    name: g.profile.displayName,
-                    email: g.profile.email,
-                    picture: g.profile.raw.picture,
+                    id: g.id,
+                    username: g.username,
+                    displayname: g.displayName,
+                    firstname: g.name.first,
+                    lastname: g.name.last,
+                    email: g.email,
+                    link: g.raw.link,
+                    picture: g.raw.picture,
+                    gender: g.raw.male
                 };
                 request.auth.session.set(profile);
-                reply.redirect('/');
+                db.addDetails(profile.id, profile.username, profile.displayname, profile.firstname, profile.lastname, profile.email, profile.link, profile.picture, profile.gender,
+                function(err, data) {
+                    reply.redirect('/profile');
+                })
             }
         }    
     },
@@ -168,6 +183,81 @@ module.exports = [
             }
         }
     },
+
+//Status page allowing client to enter credit card details and complete payment
+{
+    method: 'GET',
+    path: '/status',
+    config: {
+        auth: 'camunity-cookie',
+        handler: function(request, reply) {
+            reply.view('status', {key: creds.stripe_testpk});
+        }
+    }
+},
+
+{
+    method: 'POST',
+    path: '/status',
+    config: {
+        auth: 'camunity-cookie',
+        handler: function(request, reply) {
+            var stripeToken = request.payload.stripeToken;
+            db.addToken(stripeToken, function(err, data) {
+                reply('Your details have been saved. Payment is only charged when the job is completed');
+            });
+        }
+    }
+},
+
+{
+    method: 'POST',
+    path: '/jobcompleted',
+    config: {
+        auth: 'camunity-cookie',
+        handler: function(request, reply) {
+            db.getToken(function(err, data) {
+
+            var charge = stripe.charges.create({
+                amount:10000,
+                currency:"gbp",
+                source: data.stripetoken,
+                destination: "acct_15juWJIQ7u0M1Wf0"
+            }, function(err, charge) {
+                if (err && err.type === 'StripeCardError') {
+                    console.log("stripe error");
+                }
+            reply('Job completed')
+            });
+
+            });
+        }
+    }
+},
+
+//webhooks
+// {
+//     method: 'POST',
+//     path: '/my/mywebhook/url',
+//     config: {
+//         handler: function(request, reply) {
+//             var event_json = JSON.parse(request.payload);
+//             console.log("An event has happened: " + event_json);
+//             reply(200);
+//         }
+//     }
+// },
+
+// {
+//     method: 'GET',
+//     path: '/my/mywebhook/url',
+//     config: {
+//         handler: function(request, reply) {
+//             console.log("something has happened");
+//             reply(200);
+//         }
+//     }
+// },
 
 
 ];
