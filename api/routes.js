@@ -230,7 +230,8 @@ module.exports = [
                     var array = [];
                     array.push({'name' : name, 'stripeid': userdetails.stripe_user_id});
                     console.log(array);
-                    db.updateJob(array, function(err, data) {
+                    var id = 
+                    db.updateJob(id, array, function(err, data) {
                         reply.redirect('/jobs');
                     });
                 });
