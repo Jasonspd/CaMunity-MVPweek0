@@ -10,6 +10,6 @@ block content
 				h4 Applicants:
 				p Photographer Name: 
 				each photographer in job.photographer
-					p #{photographer.name} blah blah | Profile: |
+					p #{photographer.name} | Profile: |
 				form(action="/myjobs" method="POST")
 					script.stripe-button(src="https://checkout.stripe.com/checkout.js", data-key='#{key}', data-amount='#{job.price}', data-name='#{job.title}', data-description='#{job.summary}')
