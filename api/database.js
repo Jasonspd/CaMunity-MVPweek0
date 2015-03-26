@@ -26,7 +26,7 @@ function user(id, username, displayname, firstname, lastname, email, link, pictu
 
 function addDetails(id, username, displayname, firstname, lastname, email, link, picture, gender, callback) {
 	var newUser = new user(id, username, displayname, firstname, lastname, email, link, picture, gender);
-	db.users.save(newUser, function (err,data){
+	db.user.save(newUser, function (err,data){
 		if (err) {
 			return callback(err, null);
 		}

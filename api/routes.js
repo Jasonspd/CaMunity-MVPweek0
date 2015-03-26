@@ -125,7 +125,7 @@ module.exports = [
                 db.addDetails(profile.id, profile.username, profile.displayname, profile.firstname, profile.lastname, profile.email, profile.link, profile.picture, profile.gender,
                 function(err, data) {
                     reply.redirect('/profile');
-                })
+                });
             }
         }    
     },
