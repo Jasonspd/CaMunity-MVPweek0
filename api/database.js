@@ -106,10 +106,10 @@ function addJob(title, summary, price, client, photographer, stripeId,
 	});
 }
 
-function getOneJob(id,callback) {
+function getOneJob(id, callback) {
 	db.jobs.findOne( {_id: id}, function(err, data){
 		if (err) {
-			return callback(err, null);
+			return callback(err);
 		}
 		else {
 			return callback(null, data);
@@ -148,8 +148,11 @@ function getMyJobs(name, callback) {
 
 
 // This is the function for updating job with photographer name
-function updateJob (array, callback) {
-	db.jobs.update({photographer: array}, function(err, data) {
+function updateJob(id, object, callback) {
+	db.jobs.findAndModify({
+		query: {_id: id},
+		update: {$push: {photographer: object} }
+	}, function(err, data) {
 		if (err) {
 			return callback(err, null);
 		}

@@ -94,7 +94,7 @@ module.exports = [
                     var summary = request.payload.summary;
                     var price = request.payload.price;
                     var client = request.auth.credentials.displayname;
-                    var photographer = "cameraman";
+                    var photographer = [];
                     var stripeId = "cash, money, code";
                     var token = "Ummm";
 
@@ -122,9 +122,12 @@ module.exports = [
                     email: g.email,
                     link: g.raw.link,
                     picture: g.raw.picture,
-                    gender: g.raw.male
+                    gender: g.raw.male,
+                    jobs: "hello"
                 };
+                request.auth.session.clear();
                 request.auth.session.set(profile);
+                console.log(profile);
                 db.addDetails(profile.id, profile.username, profile.displayname, profile.firstname, profile.lastname, profile.email, profile.link, profile.picture, profile.gender,
                 function(err, data) {
                     reply.redirect('/profile');
@@ -150,6 +153,19 @@ module.exports = [
     },
 
     {
+        method: 'POST',
+        path: '/jobs/{id}',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                var id = request.params.id;
+                request.auth.session.set('jobs', id);
+                reply.redirect('/authorize');
+            }
+        }
+    },
+
+    {
         method: 'GET',
         path: '/myjobs',
         config: {
@@ -157,8 +173,6 @@ module.exports = [
             handler: function(request, reply) {
                     var name = request.auth.credentials.displayname;
                     db.getMyJobs(name, function(err, jobs){
-                        console.log(jobs);
-                        console.log(jobs[0].title);
                         reply.view('myjobs', {jobs: jobs, key: creds.stripe_testpk});
                     });
             }
@@ -226,14 +240,26 @@ module.exports = [
                     }
                 }, function(err, r, body) {
                     var userdetails = JSON.parse(body);
+
                     var name = request.auth.credentials.displayname;
-                    var array = [];
-                    array.push({'name' : name, 'stripeid': userdetails.stripe_user_id});
-                    console.log(array);
-                    var id = 
-                    db.updateJob(id, array, function(err, data) {
-                        reply.redirect('/jobs');
-                    });
+                    var numbers = request.auth.credentials.jobs;
+                    console.log('creds' + numbers);
+                    var id = mongojs.ObjectId(numbers);
+                    
+                    db.getOneJob(id, function(error, data) {
+                        console.log('data: ' + data);
+                        console.log('err: ' + error);
+                        var newphotographers = data.photographer;
+                        newphotographers.push({'name' : name, 'stripeid': userdetails.stripe_user_id});
+                        var object = {'name' : name, 'stripeid': userdetails.stripe_user_id};
+                        
+                            db.updateJob(id, object, function(err, data) {
+                            console.log(data);
+                            request.auth.session.set('jobs', 'jason was here');
+                            reply.redirect('/jobs');
+                        });
+
+                    })
                 });
             }
         }
