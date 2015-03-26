@@ -46,6 +46,7 @@ function job(title, summary, price, client, dateAdded) {
 	this.dateAdded = new Date();
 }
 
+
 function addJob(title, summary, price, client, callback) {
 	var newJob = new job(title, summary, price, client);
 	db.jobs.save(newJob, function (err, data) {
