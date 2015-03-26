@@ -1,0 +1,7 @@
+extend layout
+
+block content
+	if thisJob
+			.panel.panel-primary
+							.panel-heading Title: #{thisJob.title} | Price: #{thisJob.price} | Written by: #{thisJob.client} | Date: #{thisJob.dateAdded}
+							.panel-body Summary: #{thisJob.summary}

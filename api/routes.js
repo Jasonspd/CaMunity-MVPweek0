@@ -130,6 +130,22 @@ module.exports = [
         }    
     },
 
+    {
+        method: 'GET',
+        path: '/jobs/{id}',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                db.getAllJobs(function(err, data) {
+                    var id = mongojs.ObjectId(request.params.id);
+                    db.getOneJob(id, function(err2, job){
+                        reply.view('eachjob', {jobs: data, thisJob: job} );
+                    })
+                });
+            }
+        }
+    },
+
 //Page to view all job posts
     {
         method: 'GET',

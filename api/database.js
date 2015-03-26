@@ -1,7 +1,7 @@
 var mongojs = require("mongojs");
 var creds = require("../creds.json");
 // var db = mongojs("mylocaldatabase", ['user']);
-var db = mongojs(creds.dbname + ":" + creds.dbpwd + creds.dburl, ['users', 'tokens', 'jobs']);
+var db = mongojs(creds.dbname + ":" + creds.dbpwd + creds.dburl, ['user', 'photographer_user', 'client_user', 'tokens', 'jobs']);
 
 db.on('error',function(err) {
     console.log('database error', err);
@@ -37,6 +37,45 @@ function addDetails(id, username, displayname, firstname, lastname, email, link,
 	});
 }
 
+//___________________________________________//
+
+function addClientDetails(id, username, displayname, firstname, lastname, email, link, picture, gender, callback) {
+	var newUser = new user(id, username, displayname, firstname, lastname, email, link, picture, gender);
+	db.client_user.save(newUser, function (err,data){
+		if (err) {
+			return callback(err, null);
+		}
+		else {
+			console.log('User saved: ',data);
+			return callback(null, data);
+		}
+	});
+}
+
+function addPhotographerDetails(id, username, displayname, firstname, lastname, email, link, picture, gender, callback) {
+	var newUser = new user(id, username, displayname, firstname, lastname, email, link, picture, gender);
+	db.photographer_user.save(newUser, function (err,data){
+		if (err) {
+			return callback(err, null);
+		}
+		else {
+			console.log('User saved: ',data);
+			return callback(null, data);
+		}
+	});
+}
+
+//_______________________________________________//
+
+// job {
+// 	_id
+// 	job title
+// 	job summary
+// 	job price
+// 	photographer 
+// 	token
+// 	stripe account user id
+// }
 
 function job(title, summary, price, client, dateAdded) {
 	this.title = title;
@@ -55,6 +94,17 @@ function addJob(title, summary, price, client, callback) {
 		}
 		else {
 			console.log('Job saved: ', data);
+			return callback(null, data);
+		}
+	});
+}
+
+function getOneJob(id,callback) {
+	db.jobs.findOne( {_id: id}, function(err, data){
+		if (err) {
+			return callback(err, null);
+		}
+		else {
 			return callback(null, data);
 		}
 	});
@@ -103,6 +153,9 @@ function getToken(callback) {
 }
 
 module.exports = {
+	getOneJob: getOneJob,
+	addPhotographerDetails: addPhotographerDetails,
+	addClientDetails: addClientDetails,
 	getToken: getToken,
 	addToken: addToken,
 	addDetails: addDetails,
