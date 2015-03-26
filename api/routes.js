@@ -94,8 +94,11 @@ module.exports = [
                     var summary = request.payload.summary;
                     var price = request.payload.price;
                     var client = request.auth.credentials.displayname;
+                    var photographer = "cameraman";
+                    var stripeId = "cash, money, code";
+                    var token = "Ummm";
 
-                    db.addJob(title, summary, price, client, function(err, data) {
+                    db.addJob(title, summary, price, client, photographer, stripeId, token, function(err, data) {
                         reply.redirect('/jobs');
                     });
             }
@@ -140,11 +143,38 @@ module.exports = [
                     var id = mongojs.ObjectId(request.params.id);
                     db.getOneJob(id, function(err2, job){
                         reply.view('eachjob', {jobs: data, thisJob: job} );
-                    })
+                    });
                 });
             }
         }
     },
+
+    {
+        method: 'GET',
+        path: '/myjobs',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                    var name = request.auth.credentials.displayname;
+                    db.getMyJobs(name, function(err, jobs){
+                        console.log(jobs);
+                        console.log(jobs[0].title);
+                        reply.view('myjobs', {jobs: jobs, key: creds.stripe_testpk});
+                    });
+            }
+        }
+    },
+
+    {
+        method: 'POST',
+        path: '/myjobs',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                reply.redirect('/myjobs');
+            }
+        }
+    }, 
 
 //Page to view all job posts
     {
@@ -164,7 +194,8 @@ module.exports = [
     {
         method: 'GET',
         path: '/authorize',
-        config: {auth: {mode: 'optional'},
+        config: {
+            auth:'camunity-cookie',
             handler: function(request, reply) {
                 var auth_uri = 'https://connect.stripe.com/oauth/authorize';
                 reply.redirect(auth_uri + "?" + qs.stringify({
@@ -181,7 +212,8 @@ module.exports = [
     {
         method: 'GET',
         path: '/oauth',
-        config: {auth: {mode: 'optional'},
+        config: {
+            auth: 'camunity-cookie',
             handler: function(request, reply){
                 var code = request.query.code;
                 req.post({
@@ -194,7 +226,13 @@ module.exports = [
                     }
                 }, function(err, r, body) {
                     var userdetails = JSON.parse(body);
-                    reply(body);
+                    var name = request.auth.credentials.displayname;
+                    var array = [];
+                    array.push({'name' : name, 'stripeid': userdetails.stripe_user_id});
+                    console.log(array);
+                    db.updateJob(array, function(err, data) {
+                        reply.redirect('/jobs');
+                    });
                 });
             }
         }
@@ -243,7 +281,7 @@ module.exports = [
                 if (err && err.type === 'StripeCardError') {
                     console.log("stripe error");
                 }
-            reply('Job completed')
+            reply('Job completed');
             });
 
             });

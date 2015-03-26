@@ -77,17 +77,24 @@ function addPhotographerDetails(id, username, displayname, firstname, lastname, 
 // 	stripe account user id
 // }
 
-function job(title, summary, price, client, dateAdded) {
+function job(title, summary, price, client, photographer, stripeId,
+	token, dateAdded) {
 	this.title = title;
 	this.summary = summary;
 	this.price = price;
 	this.client = client;
 	this.dateAdded = new Date();
+	this.photographer = photographer;
+	this.stripeId = stripeId;
+	this.token = token;
 }
 
 
-function addJob(title, summary, price, client, callback) {
-	var newJob = new job(title, summary, price, client);
+
+function addJob(title, summary, price, client, photographer, stripeId,
+	token, callback) {
+	var newJob = new job(title, summary, price, client, photographer, stripeId,
+	token);
 	db.jobs.save(newJob, function (err, data) {
 		if (err) {
 			return callback(err, null);
@@ -121,6 +128,39 @@ function getAllJobs(callback) {
 	});
 }
 
+
+
+
+// db.mycollection.find().sort({name:1}, function(err, docs) {
+//     // docs is now a sorted array
+// });
+
+function getMyJobs(name, callback) {
+	db.jobs.find({client: name}, function(err, data) {
+		if (err) {
+			return callback(err, null);
+		}
+		else {
+			return callback(null, data);
+		}
+	});
+}
+
+
+// This is the function for updating job with photographer name
+function updateJob (array, callback) {
+	db.jobs.update({photographer: array}, function(err, data) {
+		if (err) {
+			return callback(err, null);
+		}
+		else {
+			return callback(null, data);
+		}
+	});
+}
+
+
+
 function token(stripetoken, dateAdded) {
 	this.stripetoken = stripetoken;
 	this.dateAdded = new Date();
@@ -153,6 +193,7 @@ function getToken(callback) {
 }
 
 module.exports = {
+	updateJob: updateJob,
 	getOneJob: getOneJob,
 	addPhotographerDetails: addPhotographerDetails,
 	addClientDetails: addClientDetails,
@@ -160,5 +201,6 @@ module.exports = {
 	addToken: addToken,
 	addDetails: addDetails,
 	addJob: addJob,
-	getAllJobs: getAllJobs
+	getAllJobs: getAllJobs,
+	getMyJobs: getMyJobs
 };

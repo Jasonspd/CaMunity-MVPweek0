@@ -1,0 +1,13 @@
+extend layout
+
+block content
+	if jobs
+			.panel.panel-primary
+				.panel-heading Title: #{jobs[0].title} | Price: #{jobs[0].price} | Date: #{jobs[0].dateAdded}
+				.panel-body 
+				h4 Summary:
+				p #{jobs[0].summary}
+				h4 Applicants:
+				p Photographer Name: | Profile: | 
+				form(action="/myjobs" method="POST")
+					script.stripe-button(src="https://checkout.stripe.com/checkout.js", data-key='#{key}', data-amount='#{jobs[0].price}', data-name='#{jobs[0].title}', data-description='You are abouut to desposit your funds for the job: #{jobs[0].title}')
