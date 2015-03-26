@@ -1,10 +1,10 @@
 {
-	"dbname": "<database name>",
-	"dbpwd": "<database password>",
-	"dburl": "<database remote url>",
-	"twitter_clientId": "<login oauth app clientId>",
-	"twitter_clientSecret":"<login oauth app clientSecret>",
-	"stripe_clientId": "<stripe app client id>",
-	"stripe_testSecret": "<stripe test secret key>",
-	"stripe_testPublish": "<stripe test publishable key>"
+	"dbname": "<mongodb database name>",
+	"dbpwd": "<mongodb database password>",
+	"dburl": "<mongdb url>",
+	"stripe_clientId": "<stripe client ID>",
+	"stripe_testsecret": "<stripe test secret key>",
+	"stripe_testpk": "<stripe test publishable key>",
+	"google_clientId" : "<google client ID>",
+    "google_clientSecret" : "<google client secret>"
 }
