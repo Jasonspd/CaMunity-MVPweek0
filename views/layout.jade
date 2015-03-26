@@ -23,18 +23,19 @@ html
 							li
 								a(href="/jobs") Jobs
 									span.sr-only (current)
+							li
+								a(href="/profile") Profile
+							li
+								a(href="/account") Account
 							li.dropdown
-								a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-expanded="false") More
+								a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-expanded="false") Client
 									span.caret
 								ul.dropdown-menu(role="menu")
 									li
-										a(href="/profile") Profile
+										a(href="/myjobs") My jobs
 									li.divider
-									li
-										a(href="/account") Account
-									li.divider
-									li
-										a(href="#") Logout
+							li
+								a(href="/logout") Logout
 
 			block content
 

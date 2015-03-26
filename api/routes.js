@@ -198,7 +198,7 @@ module.exports = [
             auth: 'camunity-cookie',
             handler: function(request, reply) {
                 db.getAllJobs(function (err, data) {
-                    reply.view('jobs', {jobs: data} );
+                    reply.view('jobs', {jobs: data, job_id: } );
                 });
             }
         }
@@ -312,6 +312,19 @@ module.exports = [
             });
 
             });
+        }
+    }
+},
+
+//Logout
+{
+    method: 'GET',
+    path: '/logout',
+    config: {
+        auth: 'camunity-cookie',
+        handler: function(request, reply) {
+            request.auth.session.clear();
+            reply.redirect('/');
         }
     }
 },

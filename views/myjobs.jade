@@ -8,6 +8,8 @@ block content
 				.panel-body #{job.summary}
 				hr
 				h4 Applicants:
-				p Photographer Name: | Profile: | 
+				p Photographer Name: 
+				each photographer in job.photographer
+					p #{photographer.name} blah blah | Profile: |
 				form(action="/myjobs" method="POST")
 					script.stripe-button(src="https://checkout.stripe.com/checkout.js", data-key='#{key}', data-amount='#{job.price}', data-name='#{job.title}', data-description='#{job.summary}')
