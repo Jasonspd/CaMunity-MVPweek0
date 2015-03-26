@@ -2,10 +2,18 @@ extend layout
 
 block content
 	h1 Status
+
+	hr
+	h3 Client: Enter details
 	.div 
 		form(action="/status" method="POST")
 			script.stripe-button(src="https://checkout.stripe.com/checkout.js", data-key='#{key}', data-amount='5000', data-name='Pay photographer', data-description='For 2 hours of work')
 	hr
+
+	h3 Photographers: Get paid!
+	a.btn.btn-default(href='/authorize') Login on stripe
+
+	hr 
 	.div
 		form(action="/jobcompleted" method="POST")
 			input.btn.btn-default(type='submit', value = 'Job Completed')
