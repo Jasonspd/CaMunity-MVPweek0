@@ -65,7 +65,6 @@ function getAllJobs(callback) {
 			return callback(err, null);
 		}
 		else {
-			console.log();
 			return callback(null, data);
 		}
 	});
@@ -77,7 +76,6 @@ function token(stripetoken, dateAdded) {
 }
 
 function addToken(stripetoken, callback) {
-	console.log("Token is about to be added to the database");
 	var newToken = new token(stripetoken);
 	db.tokens.save(newToken, function (err, data) {
 		if (err) {

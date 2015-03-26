@@ -90,14 +90,12 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                    console.log("are we getting post request");
                     var title = request.payload.title;
                     var summary = request.payload.summary;
                     var price = request.payload.price;
                     var client = request.auth.credentials.displayname;
 
                     db.addJob(title, summary, price, client, function(err, data) {
-                        console.log("is it displaying account page");
                         reply.redirect('/jobs');
                     });
             }
@@ -112,7 +110,6 @@ module.exports = [
             auth: 'google',
             handler: function (request, reply) {
                 var g = request.auth.credentials.profile;
-                console.log(g);
                 var profile = {
                     id: g.id,
                     username: g.username,
