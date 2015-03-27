@@ -138,7 +138,8 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                reply.view('account');
+                var usertype = request.auth.credentials.usertype;
+                reply.view('account', {usertype: usertype});
             }
         }
     },
@@ -148,7 +149,7 @@ module.exports = [
         method: 'POST',
         path: '/account',
         config: {
-            auth: 'camunity-cookie',
+            auth: 'camunity-cookie',    
             handler: function(request, reply) {
                     var title = request.payload.title;
                     var summary = request.payload.summary;
@@ -161,6 +162,11 @@ module.exports = [
                     db.addJob(title, summary, price, client, photographer, stripeId, token, function(err, data) {
                         reply.redirect('/jobs');
                     });
+            },
+            validate: {
+                payload: {
+                    price: Joi.number()
+                }
             }
         }
     },
@@ -203,7 +209,7 @@ module.exports = [
                     
                     var id = mongojs.ObjectId(jobId)
                     db.updateToken(id, token, function(err, data) {
-                        reply.redirect('/myjobs');
+                        reply.redirect('/profile');
                     })
                 }
             }
@@ -217,33 +223,18 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                    var name = request.auth.credentials.displayname;
+                var name = request.auth.credentials.displayname;
+                var usertype = request.auth.credentials.usertype;
+                if(usertype == 'client') {
                     db.getMyJobs(name, function(err, jobs){
-                        reply.view('myjobs', {jobs: jobs, key: creds.stripe_testpk});
+                        reply.view('myjobs', {jobs: jobs, key: creds.stripe_testpk, usertype: usertype});
                     });
-            }
-        }
-    },
-
-    {
-        method: 'POST',
-        path: '/myjobs',
-        config: {
-            auth: 'camunity-cookie',
-            handler: function(request, reply) {
-                var id = request.params.id;
-                request.auth.session.set('jobs', id)
-
-                var token = request.payload.stripeToken;
-                var card = request.payload.stripeTokenType;
-                var email = request.payload.stripeEmail;
-                var numbers = "55146978c56c8fc621324cbd";
-                var id = mongojs.ObjectId(numbers);
-
-                db.updateToken(id, token, function(err, data) {
-                    console.log(data);
-                    reply.redirect('/myjobs');
-                })
+                } else if(usertype == 'photographer') {
+                    db.getMyJobsP(name, function(err, jobs){
+                            console.log(jobs);
+                            reply.view('myjobs', {jobs: jobs, usertype: usertype});
+                    });
+                }
             }
         }
     },
@@ -280,8 +271,8 @@ module.exports = [
         }
     },
 
-//Callback route after /authorize
-//Database saves name, job_id and stripe_id
+//Callback route after /authorize, stripe posts us stripe_id
+//Database saves name and stripe_id
     {
         method: 'GET',
         path: '/oauth',
@@ -318,29 +309,19 @@ module.exports = [
         }
     },
 
-//Status page allowing client to enter credit card details and complete payment
-    {
-        method: 'GET',
-        path: '/status',
-        config: {
-            auth: 'camunity-cookie',
-            handler: function(request, reply) {
-                reply.view('status', {key: creds.stripe_testpk});
-            }
-        }
-    },
-
-//Mock version works
+//Not the most reliable version
     {
         method: 'POST',
         path: '/jobcompleted',
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                var numbers = "55146978c56c8fc621324cbd";
-                var id = mongojs.ObjectId(numbers);
+                var jobId = request.auth.credentials.jobs;
+                var id = mongojs.ObjectId(jobId);
+                console.log(id);
 
                 db.getOneJob(id, function(err, data) {
+                    console.log(data);
 
                     var charge = stripe.charges.create({
                         amount: data.price,
@@ -351,7 +332,7 @@ module.exports = [
                         if (err && err.type === 'StripeCardError') {
                             console.log("stripe error");
                         }
-                        reply('Job completed');
+                        reply.redirect("/profile");
                     });
 
                 });
@@ -359,7 +340,7 @@ module.exports = [
         }
     },
 
-    //Logout
+//Logout, clears session
     {
         method: 'GET',
         path: '/logout',
@@ -372,7 +353,7 @@ module.exports = [
         }
     },
 
-    //webhooks
+//webhooks testing
     // {
     //     method: 'POST',
     //     path: '/my/mywebhook/url',

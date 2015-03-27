@@ -145,12 +145,39 @@ function getMyJobs(name, callback) {
 	});
 }
 
+function getMyJobsP(name, callback) {
+	db.jobs.find({photographer: {name: name}}, function(err, data) {
+		if (err) {
+			return callback(err, null);
+		}
+		else {
+			return callback(null, data);
+		}
+	});
+}
+
+
 
 // This is the function for updating job with photographer name
 function updateJob(id, object, callback) {
 	db.jobs.findAndModify({
 		query: {_id: id},
 		update: {$push: {photographer: object} }
+	}, function(err, data) {
+		if (err) {
+			return callback(err, null);
+		}
+		else {
+			console.log(data);
+			return callback(null, data);
+		}
+	});
+}
+
+function selectPhotographer(id, object, callback) {
+	db.jobs.findAndModify({
+		query: {_id: id},
+		update: {$set: {photographer: object} }
 	}, function(err, data) {
 		if (err) {
 			return callback(err, null);
@@ -211,6 +238,8 @@ function getToken(callback) {
 }
 
 module.exports = {
+	selectPhotographer: selectPhotographer,
+	getMyJobsP: getMyJobsP,
 	updateToken: updateToken,
 	updateJob: updateJob,
 	getOneJob: getOneJob,

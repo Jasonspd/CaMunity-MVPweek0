@@ -1,34 +1,35 @@
 extend layout
 
 block content
-	h1 Account
-	//- h3 Edit your profile details
-	//- form.form-horizontal.editdetails
-	//- 	.form-group
-	//- 		label Firstname:
-	//- 			input(type="text")
-	//- 	.form-group
-	//- 		label Lastname:
-	//- 			input(type="text")
-	//- 	.form-group
-	//- 		label Website:
-	//- 			input(type="text")
-	//- 	.form-group
-	//- 		label Summary:
-	//- 			input(type="text")
-	.panel.panel-primary
-		.panel.panel-heading
-			h4 Create a job post
-		.panel.panel-body
-			form.form-horizontal.createjobpost(action='/account', role='form', method='POST')
-				.form-group
-					label Job title:
-						input(type="text", name='title')
-				.form-group
-					label Summary:
-						input(type="text", name='summary')
-				.form-group
-					label Price: 
-						input(type="text", name='price')
-				.form-group
-					input.btn.btn-default(type='submit', value='Add job')
+	if usertype == 'client'
+		h1 Create Job
+		//- h3 Edit your profile details
+		//- form.form-horizontal.editdetails
+		//- 	.form-group
+		//- 		label Firstname:
+		//- 			input(type="text")
+		//- 	.form-group
+		//- 		label Lastname:
+		//- 			input(type="text")
+		//- 	.form-group
+		//- 		label Website:
+		//- 			input(type="text")
+		//- 	.form-group
+		//- 		label Summary:
+		//- 			input(type="text")
+		.panel.panel-primary
+			.panel.panel-heading
+				h4 Create a job post
+			.panel.panel-body
+				form.form-horizontal.createjobpost(action='/account', role='form', method='POST')
+					.form-group
+						label Job title:
+							input(type="text", name='title' required)
+					.form-group
+						label Summary:
+							input(type="text", name='summary' required)
+					.form-group
+						label Price: 
+							input(type="text", name='price' required	)
+					.form-group
+						input.btn.btn-default(type='submit', value='Add job')
