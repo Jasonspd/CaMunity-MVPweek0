@@ -76,7 +76,7 @@ function addPhotographerDetails(id, username, displayname, firstname, lastname, 
 // 	stripe account user id
 // }
 
-function job(title, summary, price, client, photographer, stripeId,
+function job(title, summary, price, client, photographer,
 	token, dateAdded) {
 	this.title = title;
 	this.summary = summary;
@@ -84,16 +84,13 @@ function job(title, summary, price, client, photographer, stripeId,
 	this.client = client;
 	this.dateAdded = new Date();
 	this.photographer = photographer;
-	this.stripeId = stripeId;
 	this.token = token;
 }
 
 
 
-function addJob(title, summary, price, client, photographer, stripeId,
-	token, callback) {
-	var newJob = new job(title, summary, price, client, photographer, stripeId,
-	token);
+function addJob(title, summary, price, client, photographer, token, callback) {
+	var newJob = new job(title, summary, price, client, photographer, token);
 	db.jobs.save(newJob, function (err, data) {
 		if (err) {
 			return callback(err, null);
