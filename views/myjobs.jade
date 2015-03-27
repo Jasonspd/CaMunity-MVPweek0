@@ -5,12 +5,11 @@ block content
 		each job in jobs
 			h1 My Jobs
 			.panel.panel-primary
-				.panel-heading Title: #{job.title} | Price: #{job.price} | Date: #{job.dateAdded}
+				.panel-heading Title: #{job.title} | Price: #{job.price} | Date: #{job.dateAdded} 
+					a.btn.btn-default(href='/jobs/'+job._id) Accept Job
 				.panel-body #{job.summary}
 				hr
 				h4 Applicants:
 				p Photographer Name: 
 				each photographer in job.photographer
-					p #{photographer.name} | Profile: |
-				form(action="/myjobs" method="POST")
-					script.stripe-button(src="https://checkout.stripe.com/checkout.js", data-key='#{key}', data-amount='#{job.price}', data-name='#{job.title}', data-description='#{job.summary}')
+					p #{photographer.name} | Profile: "for public profile link"

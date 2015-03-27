@@ -36,7 +36,77 @@ module.exports = [
         path: '/',
         config: {auth: {mode: 'optional'},
             handler: function(request, reply) {
-                reply.view('homepage', {key: creds.stripe_testpk});
+                if(request.auth.isAuthenticated) {
+                    return reply.redirect('/profile');
+                } else {
+                    reply.view('homepage', {key: creds.stripe_testpk});
+                }
+            }
+        }
+    },
+
+    //Login clears session, sets session and adds users into database
+    {
+        method: 'GET',
+        path: '/login',
+        config: {
+            auth: 'google',
+            handler: function (request, reply) {
+                var g = request.auth.credentials.profile;
+                var profile = {
+                    id: g.id,
+                    username: g.username,
+                    displayname: g.displayName,
+                    firstname: g.name.first,
+                    lastname: g.name.last,
+                    email: g.email,
+                    link: g.raw.link,
+                    picture: g.raw.picture,
+                    gender: g.raw.male,
+                    jobs: "hello",
+                    usertype: "nouser"
+                };
+                request.auth.session.clear();
+                request.auth.session.set(profile);
+                db.addDetails(profile.id, profile.username, profile.displayname, profile.firstname, profile.lastname, profile.email, profile.link, profile.picture, profile.gender,
+                function(err, data) {
+                    reply.redirect('/usertype');
+                });
+            }
+        }    
+    },
+
+    {
+        method: 'GET',
+        path: '/usertype',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                reply.view('usertype');
+            }
+        }
+    },
+
+     {
+        method: 'POST',
+        path: '/client',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                request.auth.session.set('usertype', 'client');
+                reply.redirect('/profile');
+            }
+        }
+    },
+
+     {
+        method: 'POST',
+        path: '/photographer',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                request.auth.session.set('usertype', 'photographer');
+                reply.redirect('/profile');
             }
         }
     },
@@ -48,6 +118,7 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
+                console.log('what user am i? ' + request.auth.credentials.usertype);
                 var d = request.auth.credentials;
                 var dname = d.displayname;
                 var first = d.firstname;
@@ -94,37 +165,6 @@ module.exports = [
         }
     },
 
-//Login clears session, sets session and adds users into database
-    {
-        method: 'GET',
-        path: '/login',
-        config: {
-            auth: 'google',
-            handler: function (request, reply) {
-                var g = request.auth.credentials.profile;
-                var profile = {
-                    id: g.id,
-                    username: g.username,
-                    displayname: g.displayName,
-                    firstname: g.name.first,
-                    lastname: g.name.last,
-                    email: g.email,
-                    link: g.raw.link,
-                    picture: g.raw.picture,
-                    gender: g.raw.male,
-                    jobs: "hello"
-                };
-                request.auth.session.clear();
-                request.auth.session.set(profile);
-                console.log(profile);
-                db.addDetails(profile.id, profile.username, profile.displayname, profile.firstname, profile.lastname, profile.email, profile.link, profile.picture, profile.gender,
-                function(err, data) {
-                    reply.redirect('/profile');
-                });
-            }
-        }    
-    },
-
 //Individual job that allows photographers to apply for
     {
         method: 'GET',
@@ -135,7 +175,8 @@ module.exports = [
                 db.getAllJobs(function(err, data) {
                     var id = mongojs.ObjectId(request.params.id);
                     db.getOneJob(id, function(err2, job){
-                        reply.view('eachjob', {jobs: data, thisJob: job} );
+                        var usertype = request.auth.credentials.usertype;
+                        reply.view('eachjob', {jobs: data, thisJob: job, key: creds.stripe_testpk, usertype: usertype} );
                     });
                 });
             }
@@ -149,9 +190,22 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                var id = request.params.id;
-                request.auth.session.set('jobs', id);
-                reply.redirect('/authorize');
+                var jobId = request.params.id;
+                request.auth.session.set('jobs', jobId);
+
+                if(request.auth.credentials.usertype == 'photographer') {
+                    reply.redirect('/authorize');
+                } else if (request.auth.credentials.usertype == 'client') {
+                    
+                    var token = request.payload.stripeToken;
+                    var card = request.payload.stripeTokenType;
+                    var email = request.payload.stripeEmail;
+                    
+                    var id = mongojs.ObjectId(jobId)
+                    db.updateToken(id, token, function(err, data) {
+                        reply.redirect('/myjobs');
+                    })
+                }
             }
         }
     },
@@ -177,6 +231,9 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
+                var id = request.params.id;
+                request.auth.session.set('jobs', id)
+
                 var token = request.payload.stripeToken;
                 var card = request.payload.stripeTokenType;
                 var email = request.payload.stripeEmail;
@@ -199,7 +256,8 @@ module.exports = [
             auth: 'camunity-cookie',
             handler: function(request, reply) {
                 db.getAllJobs(function (err, data) {
-                    reply.view('jobs', {jobs: data} );
+                    var usertype = request.auth.credentials.usertype;
+                    reply.view('jobs', {jobs: data, usertype: usertype} );
                 });
             }
         }

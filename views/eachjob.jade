@@ -5,5 +5,11 @@ block content
 			.panel.panel-primary
 				.panel-heading Title: #{thisJob.title} | Price: #{thisJob.price} | Written by: #{thisJob.client} | Date: #{thisJob.dateAdded}
 				.panel-body Summary: #{thisJob.summary}
-				form(action='', method= 'POST')
-					input.btn.btn-default(type='submit', value='Apply')
+				if usertype == 'photographer' 
+					form(action='', method= 'POST')
+						input.btn.btn-default(type='submit', value='Apply')
+				if usertype == 'client'
+					form(action="" method="POST")
+						script.stripe-button(src="https://checkout.stripe.com/checkout.js", data-key='#{key}', data-amount='#{thisJob.price}', data-name='#{thisJob.title}', data-description='#{thisJob.summary}')
+					form(action="/jobcompleted" method="POST")
+						input.btn.btn-default(type='submit', value = 'Job Completed')

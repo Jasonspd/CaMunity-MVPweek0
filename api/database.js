@@ -31,7 +31,6 @@ function addDetails(id, username, displayname, firstname, lastname, email, link,
 			return callback(err, null);
 		}
 		else {
-			console.log('User saved: ',data);
 			return callback(null, data);
 		}
 	});
@@ -157,6 +156,7 @@ function updateJob(id, object, callback) {
 			return callback(err, null);
 		}
 		else {
+			console.log(data);
 			return callback(null, data);
 		}
 	});
@@ -171,6 +171,7 @@ function updateToken(id, token, callback) {
 			return callback(err, null);
 		}
 		else {
+			console.log(data);
 			return callback(null, data);
 		}
 	});
