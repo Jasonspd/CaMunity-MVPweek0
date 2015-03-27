@@ -1,14 +1,15 @@
-extend layout
-
-block content
-	h1 CAMUNITY
-	.div 
-		a.btn.btn-default(href='/login') Login as Client
-	.div 
-		a.btn.btn-default(href='/login') Login as Photographer
-		
-
-	hr
-	h3 We welcome any donations
-	form(action="/stripe" method="POST")
-		script.stripe-button(src="https://checkout.stripe.com/checkout.js", data-key='#{key}', data-amount='2000', data-name='Pay me', data-description='£20 donation')
+doctype html
+html
+	head
+		title CamUnity
+		link(rel="stylesheet", href="../public/css/bootstrap.min.css")
+		link(rel="stylesheet", href="../public/css/style.css")
+		script(src="../public/lib/jquery-2.1.3.min.js")
+		script(src="../public/lib/bootstrap.min.js")
+			
+	body
+		.container
+			h1 CAMUNITY
+			.login
+				.login.col-md-6
+					a.btn.btn-default(href='/login') Login with Google

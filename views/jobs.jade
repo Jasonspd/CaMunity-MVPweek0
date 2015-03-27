@@ -6,5 +6,6 @@ block content
 		each job in jobs
 			.panel.panel-primary
 				.panel-heading | Title: #{job.title} | Pay: #{job.price} | Written by: #{job.client} | Date: #{job.dateAdded}      
-					a.btn.btn-default(href='/jobs/#{job._id}') Apply
+					if usertype == 'photographer'
+						a.btn.btn-default(href='/jobs/'+job._id) Go to job
 				.panel-body Summary: #{job.summary}

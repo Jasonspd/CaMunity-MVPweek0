@@ -30,35 +30,95 @@ module.exports = [
             }
     },
 
-    {
-        method: 'GET',
-        path: '/stripe',
-        config: {
-            auth: 'camunity-cookie',
-            handler: function (request, reply) {
-                reply.view('homepage');
-            }
-        }
-    },
-
 //Homepage
     {
         method: 'GET',
         path: '/',
         config: {auth: {mode: 'optional'},
             handler: function(request, reply) {
-                reply.view('homepage', {key: creds.stripe_testpk });
+                if(request.auth.isAuthenticated) {
+                    return reply.redirect('/profile');
+                } else {
+                    reply.view('homepage', {key: creds.stripe_testpk});
+                }
             }
         }
     },
 
-//User profile page
+    //Login clears session, sets session and adds users into database
+    {
+        method: 'GET',
+        path: '/login',
+        config: {
+            auth: 'google',
+            handler: function (request, reply) {
+                var g = request.auth.credentials.profile;
+                var profile = {
+                    id: g.id,
+                    username: g.username,
+                    displayname: g.displayName,
+                    firstname: g.name.first,
+                    lastname: g.name.last,
+                    email: g.email,
+                    link: g.raw.link,
+                    picture: g.raw.picture,
+                    gender: g.raw.male,
+                    jobs: "hello",
+                    usertype: "nouser"
+                };
+                request.auth.session.clear();
+                request.auth.session.set(profile);
+                db.addDetails(profile.id, profile.username, profile.displayname, profile.firstname, profile.lastname, profile.email, profile.link, profile.picture, profile.gender,
+                function(err, data) {
+                    reply.redirect('/usertype');
+                });
+            }
+        }    
+    },
+
+    {
+        method: 'GET',
+        path: '/usertype',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                reply.view('usertype');
+            }
+        }
+    },
+
+     {
+        method: 'POST',
+        path: '/client',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                request.auth.session.set('usertype', 'client');
+                reply.redirect('/profile');
+            }
+        }
+    },
+
+     {
+        method: 'POST',
+        path: '/photographer',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                request.auth.session.set('usertype', 'photographer');
+                reply.redirect('/profile');
+            }
+        }
+    },
+
+//User profile page shows google credentials
     {
         method: 'GET',
         path: '/profile',
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
+                console.log('what user am i? ' + request.auth.credentials.usertype);
                 var d = request.auth.credentials;
                 var dname = d.displayname;
                 var first = d.firstname;
@@ -78,7 +138,8 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                reply.view('account');
+                var usertype = request.auth.credentials.usertype;
+                reply.view('account', {usertype: usertype});
             }
         }
     },
@@ -88,48 +149,29 @@ module.exports = [
         method: 'POST',
         path: '/account',
         config: {
-            auth: 'camunity-cookie',
+            auth: 'camunity-cookie',    
             handler: function(request, reply) {
                     var title = request.payload.title;
                     var summary = request.payload.summary;
                     var price = request.payload.price;
                     var client = request.auth.credentials.displayname;
+                    var photographer = [];
+                    var stripeId = "cash, money, code";
+                    var token = "Ummm";
 
-                    db.addJob(title, summary, price, client, function(err, data) {
+                    db.addJob(title, summary, price, client, photographer, stripeId, token, function(err, data) {
                         reply.redirect('/jobs');
                     });
+            },
+            validate: {
+                payload: {
+                    price: Joi.number()
+                }
             }
         }
     },
 
-
-    {
-        method: 'GET',
-        path: '/login',
-        config: {
-            auth: 'google',
-            handler: function (request, reply) {
-                var g = request.auth.credentials.profile;
-                var profile = {
-                    id: g.id,
-                    username: g.username,
-                    displayname: g.displayName,
-                    firstname: g.name.first,
-                    lastname: g.name.last,
-                    email: g.email,
-                    link: g.raw.link,
-                    picture: g.raw.picture,
-                    gender: g.raw.male
-                };
-                request.auth.session.set(profile);
-                db.addDetails(profile.id, profile.username, profile.displayname, profile.firstname, profile.lastname, profile.email, profile.link, profile.picture, profile.gender,
-                function(err, data) {
-                    reply.redirect('/profile');
-                });
-            }
-        }    
-    },
-
+//Individual job that allows photographers to apply for
     {
         method: 'GET',
         path: '/jobs/{id}',
@@ -139,9 +181,60 @@ module.exports = [
                 db.getAllJobs(function(err, data) {
                     var id = mongojs.ObjectId(request.params.id);
                     db.getOneJob(id, function(err2, job){
-                        reply.view('eachjob', {jobs: data, thisJob: job} );
-                    })
+                        var usertype = request.auth.credentials.usertype;
+                        reply.view('eachjob', {jobs: data, thisJob: job, key: creds.stripe_testpk, usertype: usertype} );
+                    });
                 });
+            }
+        }
+    },
+
+//Job_id session is set on application
+    {
+        method: 'POST',
+        path: '/jobs/{id}',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                var jobId = request.params.id;
+                request.auth.session.set('jobs', jobId);
+
+                if(request.auth.credentials.usertype == 'photographer') {
+                    reply.redirect('/authorize');
+                } else if (request.auth.credentials.usertype == 'client') {
+                    
+                    var token = request.payload.stripeToken;
+                    var card = request.payload.stripeTokenType;
+                    var email = request.payload.stripeEmail;
+                    
+                    var id = mongojs.ObjectId(jobId)
+                    db.updateToken(id, token, function(err, data) {
+                        reply.redirect('/profile');
+                    })
+                }
+            }
+        }
+    },
+
+//Client can see jobs he has created
+    {
+        method: 'GET',
+        path: '/myjobs',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                var name = request.auth.credentials.displayname;
+                var usertype = request.auth.credentials.usertype;
+                if(usertype == 'client') {
+                    db.getMyJobs(name, function(err, jobs){
+                        reply.view('myjobs', {jobs: jobs, key: creds.stripe_testpk, usertype: usertype});
+                    });
+                } else if(usertype == 'photographer') {
+                    db.getMyJobsP(name, function(err, jobs){
+                            console.log(jobs);
+                            reply.view('myjobs', {jobs: jobs, usertype: usertype});
+                    });
+                }
             }
         }
     },
@@ -154,7 +247,8 @@ module.exports = [
             auth: 'camunity-cookie',
             handler: function(request, reply) {
                 db.getAllJobs(function (err, data) {
-                    reply.view('jobs', {jobs: data} );
+                    var usertype = request.auth.credentials.usertype;
+                    reply.view('jobs', {jobs: data, usertype: usertype} );
                 });
             }
         }
@@ -164,7 +258,8 @@ module.exports = [
     {
         method: 'GET',
         path: '/authorize',
-        config: {auth: {mode: 'optional'},
+        config: {
+            auth:'camunity-cookie',
             handler: function(request, reply) {
                 var auth_uri = 'https://connect.stripe.com/oauth/authorize';
                 reply.redirect(auth_uri + "?" + qs.stringify({
@@ -176,12 +271,13 @@ module.exports = [
         }
     },
 
-//Callback route after users stripe account is created/logged in
-//Uses access token to POST to stripe API, then retrieve users stripe account details
+//Callback route after /authorize, stripe posts us stripe_id
+//Database saves name and stripe_id
     {
         method: 'GET',
         path: '/oauth',
-        config: {auth: {mode: 'optional'},
+        config: {
+            auth: 'camunity-cookie',
             handler: function(request, reply){
                 var code = request.query.code;
                 req.post({
@@ -193,87 +289,92 @@ module.exports = [
                         client_secret: creds.stripe_testsecret
                     }
                 }, function(err, r, body) {
+                    var name = request.auth.credentials.displayname;
                     var userdetails = JSON.parse(body);
-                    reply(body);
+                    
+                    var id = mongojs.ObjectId(request.auth.credentials.jobs);
+                    
+                    db.getOneJob(id, function(error, data) {
+                        
+                        var object = {'name' : name, 'stripeid': userdetails.stripe_user_id};
+                        
+                        db.updateJob(id, object, function(err, data) {
+                            request.auth.session.set('jobs', 'jason was here');
+                            reply.redirect('/jobs');
+                        });
+
+                    })
                 });
             }
         }
     },
 
-//Status page allowing client to enter credit card details and complete payment
-{
-    method: 'GET',
-    path: '/status',
-    config: {
-        auth: 'camunity-cookie',
-        handler: function(request, reply) {
-            reply.view('status', {key: creds.stripe_testpk});
+//Not the most reliable version
+    {
+        method: 'POST',
+        path: '/jobcompleted',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                var jobId = request.auth.credentials.jobs;
+                var id = mongojs.ObjectId(jobId);
+                console.log(id);
+
+                db.getOneJob(id, function(err, data) {
+                    console.log(data);
+
+                    var charge = stripe.charges.create({
+                        amount: data.price,
+                        currency:"gbp",
+                        source: data.token,
+                        destination: data.photographer[0].stripeid,
+                    }, function(err, charge) {
+                        if (err && err.type === 'StripeCardError') {
+                            console.log("stripe error");
+                        }
+                        reply.redirect("/profile");
+                    });
+
+                });
+            }
         }
-    }
-},
+    },
 
-{
-    method: 'POST',
-    path: '/status',
-    config: {
-        auth: 'camunity-cookie',
-        handler: function(request, reply) {
-            var stripeToken = request.payload.stripeToken;
-            db.addToken(stripeToken, function(err, data) {
-                reply('Your details have been saved. Payment is only charged when the job is completed');
-            });
+//Logout, clears session
+    {
+        method: 'GET',
+        path: '/logout',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                request.auth.session.clear();
+                reply.redirect('/');
+            }
         }
-    }
-},
+    },
 
-{
-    method: 'POST',
-    path: '/jobcompleted',
-    config: {
-        auth: 'camunity-cookie',
-        handler: function(request, reply) {
-            db.getToken(function(err, data) {
+//webhooks testing
+    // {
+    //     method: 'POST',
+    //     path: '/my/mywebhook/url',
+    //     config: {
+    //         handler: function(request, reply) {
+    //             var event_json = JSON.parse(request.payload);
+    //             console.log("An event has happened: " + event_json);
+    //             reply(200);
+    //         }
+    //     }
+    // },
 
-            var charge = stripe.charges.create({
-                amount:10000,
-                currency:"gbp",
-                source: data.stripetoken,
-                destination: "acct_15juWJIQ7u0M1Wf0"
-            }, function(err, charge) {
-                if (err && err.type === 'StripeCardError') {
-                    console.log("stripe error");
-                }
-            reply('Job completed')
-            });
-
-            });
-        }
-    }
-},
-
-//webhooks
-// {
-//     method: 'POST',
-//     path: '/my/mywebhook/url',
-//     config: {
-//         handler: function(request, reply) {
-//             var event_json = JSON.parse(request.payload);
-//             console.log("An event has happened: " + event_json);
-//             reply(200);
-//         }
-//     }
-// },
-
-// {
-//     method: 'GET',
-//     path: '/my/mywebhook/url',
-//     config: {
-//         handler: function(request, reply) {
-//             console.log("something has happened");
-//             reply(200);
-//         }
-//     }
-// },
-
+    // {
+    //     method: 'GET',
+    //     path: '/my/mywebhook/url',
+    //     config: {
+    //         handler: function(request, reply) {
+    //             console.log("something has happened");
+    //             reply(200);
+    //         }
+    //     }
+    // },
 
 ];

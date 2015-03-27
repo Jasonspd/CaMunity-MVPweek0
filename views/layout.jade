@@ -17,28 +17,31 @@ html
 							span.icon-bar
 							span.icon-bar
 							span.icon-bar
-						a.navbar-brand(href="/") CaMunity
+						a.navbar-brand CaMunity
 					#collapselist.collapse.navbar-collapse
 						ul.nav.navbar-nav
 							li
-								a(href="/jobs") Jobs
+								a(href="/profile") Profile
 									span.sr-only (current)
 							li.dropdown
-								a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-expanded="false") More
+								a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-expanded="false") Client
 									span.caret
 								ul.dropdown-menu(role="menu")
 									li
-										a(href="/profile") Profile
-									li.divider
+										a(href="/account") Create Job
 									li
-										a(href="/account") Account
-									li.divider
+										a(href="/myjobs") My jobs
+							li.dropdown
+								a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-expanded="false") Photographer
+									span.caret
+								ul.dropdown-menu(role="menu")
 									li
-										a(href="#") Logout
+										a(href="/jobs") Available Jobs
+							li
+								a(href="/logout") Logout
 
 			block content
 
 	footer
-		hr
 		.container
 			p.text-muted 

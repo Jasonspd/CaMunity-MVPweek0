@@ -1,0 +1,21 @@
+doctype html
+html
+	head
+		title CamUnity
+		link(rel="stylesheet", href="../public/css/bootstrap.min.css")
+		link(rel="stylesheet", href="../public/css/style.css")
+		script(src="../public/lib/jquery-2.1.3.min.js")
+		script(src="../public/lib/bootstrap.min.js")
+			
+	body
+		.container
+			h1 CAMUNITY
+			.login
+				.login.col-md-6
+					form(action="/client", method="POST")
+						label Are you a client, looking for photoraphers?
+							input.btn.btn-default(type='submit', value='Client')
+				.login.col-md-6
+					form(action="/photographer", method="POST")
+						lavel Are you a photographer, looking to get paid?
+							input.btn.btn-default(type='submit', value='Photographer')

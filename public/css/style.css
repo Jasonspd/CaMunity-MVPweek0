@@ -6,6 +6,10 @@ h1 {
 	font-family: Geneva;
 }
 
+.login.col-md-6 {
+	padding-top: 200px;
+}
+
 body {
 	background-image: url("https://unsplash.imgix.net/photo-1422222948315-28aadb7a2cb8?q=75&fm=jpg&s=cfeadbd7a991e58b553bee29a7eeca55");
 	background-size: 100%;
