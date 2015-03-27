@@ -8,6 +8,9 @@ var stripe = require("stripe")(creds.stripe_testsecret);
 var token_uri = 'https://connect.stripe.com/oauth/token';
 var qs = require('querystring');
 var req = require('request');
+var Boom = require('boom');
+
+var error = Boom.create(400, 'Bad request', {timestamp: Date.now()});
 
 //Exporting to server.js
 module.exports = [
@@ -153,19 +156,21 @@ module.exports = [
             handler: function(request, reply) {
                     var title = request.payload.title;
                     var summary = request.payload.summary;
-                    var price = request.payload.price;
+                    var price = request.payload.price + '00';
                     var client = request.auth.credentials.displayname;
                     var photographer = [];
                     var stripeId = "cash, money, code";
                     var token = "Ummm";
 
-                    db.addJob(title, summary, price, client, photographer, stripeId, token, function(err, data) {
+                    db.addJob(title, summary, price, client, photographer, token, function(err, data) {
                         reply.redirect('/jobs');
                     });
             },
             validate: {
                 payload: {
-                    price: Joi.number()
+                    title: Joi.string().min(3).max(50),
+                    summary: Joi.string().min(10).max(3000),
+                    price: Joi.number().integer().greater(0).max(999),
                 }
             }
         }
