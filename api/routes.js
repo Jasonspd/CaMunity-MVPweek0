@@ -30,29 +30,18 @@ module.exports = [
             }
     },
 
-    {
-        method: 'GET',
-        path: '/stripe',
-        config: {
-            auth: 'camunity-cookie',
-            handler: function (request, reply) {
-                reply.view('homepage');
-            }
-        }
-    },
-
 //Homepage
     {
         method: 'GET',
         path: '/',
         config: {auth: {mode: 'optional'},
             handler: function(request, reply) {
-                reply.view('homepage', {key: creds.stripe_testpk });
+                reply.view('homepage', {key: creds.stripe_testpk});
             }
         }
     },
 
-//User profile page
+//User profile page shows google credentials
     {
         method: 'GET',
         path: '/profile',
@@ -105,7 +94,7 @@ module.exports = [
         }
     },
 
-
+//Login clears session, sets session and adds users into database
     {
         method: 'GET',
         path: '/login',
@@ -136,6 +125,7 @@ module.exports = [
         }    
     },
 
+//Individual job that allows photographers to apply for
     {
         method: 'GET',
         path: '/jobs/{id}',
@@ -152,6 +142,7 @@ module.exports = [
         }
     },
 
+//Job_id session is set on application
     {
         method: 'POST',
         path: '/jobs/{id}',
@@ -165,6 +156,7 @@ module.exports = [
         }
     },
 
+//Client can see jobs he has created
     {
         method: 'GET',
         path: '/myjobs',
@@ -185,10 +177,19 @@ module.exports = [
         config: {
             auth: 'camunity-cookie',
             handler: function(request, reply) {
-                reply.redirect('/myjobs');
+                var token = request.payload.stripeToken;
+                var card = request.payload.stripeTokenType;
+                var email = request.payload.stripeEmail;
+                var numbers = "55146978c56c8fc621324cbd";
+                var id = mongojs.ObjectId(numbers);
+
+                db.updateToken(id, token, function(err, data) {
+                    console.log(data);
+                    reply.redirect('/myjobs');
+                })
             }
         }
-    }, 
+    },
 
 //Page to view all job posts
     {
@@ -221,8 +222,8 @@ module.exports = [
         }
     },
 
-//Callback route after users stripe account is created/logged in
-//Uses access token to POST to stripe API, then retrieve users stripe account details
+//Callback route after /authorize
+//Database saves name, job_id and stripe_id
     {
         method: 'GET',
         path: '/oauth',
@@ -239,22 +240,16 @@ module.exports = [
                         client_secret: creds.stripe_testsecret
                     }
                 }, function(err, r, body) {
-                    var userdetails = JSON.parse(body);
-
                     var name = request.auth.credentials.displayname;
-                    var numbers = request.auth.credentials.jobs;
-                    console.log('creds' + numbers);
-                    var id = mongojs.ObjectId(numbers);
+                    var userdetails = JSON.parse(body);
+                    
+                    var id = mongojs.ObjectId(request.auth.credentials.jobs);
                     
                     db.getOneJob(id, function(error, data) {
-                        console.log('data: ' + data);
-                        console.log('err: ' + error);
-                        var newphotographers = data.photographer;
-                        newphotographers.push({'name' : name, 'stripeid': userdetails.stripe_user_id});
+                        
                         var object = {'name' : name, 'stripeid': userdetails.stripe_user_id};
                         
-                            db.updateJob(id, object, function(err, data) {
-                            console.log(data);
+                        db.updateJob(id, object, function(err, data) {
                             request.auth.session.set('jobs', 'jason was here');
                             reply.redirect('/jobs');
                         });
@@ -266,92 +261,81 @@ module.exports = [
     },
 
 //Status page allowing client to enter credit card details and complete payment
-{
-    method: 'GET',
-    path: '/status',
-    config: {
-        auth: 'camunity-cookie',
-        handler: function(request, reply) {
-            reply.view('status', {key: creds.stripe_testpk});
+    {
+        method: 'GET',
+        path: '/status',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                reply.view('status', {key: creds.stripe_testpk});
+            }
         }
-    }
-},
+    },
 
-{
-    method: 'POST',
-    path: '/status',
-    config: {
-        auth: 'camunity-cookie',
-        handler: function(request, reply) {
-            var stripeToken = request.payload.stripeToken;
-            db.addToken(stripeToken, function(err, data) {
-                reply('Your details have been saved. Payment is only charged when the job is completed');
-            });
+//Mock version works
+    {
+        method: 'POST',
+        path: '/jobcompleted',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                var numbers = "55146978c56c8fc621324cbd";
+                var id = mongojs.ObjectId(numbers);
+
+                db.getOneJob(id, function(err, data) {
+
+                    var charge = stripe.charges.create({
+                        amount: data.price,
+                        currency:"gbp",
+                        source: data.token,
+                        destination: data.photographer[0].stripeid,
+                    }, function(err, charge) {
+                        if (err && err.type === 'StripeCardError') {
+                            console.log("stripe error");
+                        }
+                        reply('Job completed');
+                    });
+
+                });
+            }
         }
-    }
-},
+    },
 
-{
-    method: 'POST',
-    path: '/jobcompleted',
-    config: {
-        auth: 'camunity-cookie',
-        handler: function(request, reply) {
-            db.getToken(function(err, data) {
-
-            var charge = stripe.charges.create({
-                amount:10000,
-                currency:"gbp",
-                source: data.stripetoken,
-                destination: "acct_15juWJIQ7u0M1Wf0"
-            }, function(err, charge) {
-                if (err && err.type === 'StripeCardError') {
-                    console.log("stripe error");
-                }
-            reply('Job completed');
-            });
-
-            });
+    //Logout
+    {
+        method: 'GET',
+        path: '/logout',
+        config: {
+            auth: 'camunity-cookie',
+            handler: function(request, reply) {
+                request.auth.session.clear();
+                reply.redirect('/');
+            }
         }
-    }
-},
+    },
 
-//Logout
-{
-    method: 'GET',
-    path: '/logout',
-    config: {
-        auth: 'camunity-cookie',
-        handler: function(request, reply) {
-            request.auth.session.clear();
-            reply.redirect('/');
-        }
-    }
-},
+    //webhooks
+    // {
+    //     method: 'POST',
+    //     path: '/my/mywebhook/url',
+    //     config: {
+    //         handler: function(request, reply) {
+    //             var event_json = JSON.parse(request.payload);
+    //             console.log("An event has happened: " + event_json);
+    //             reply(200);
+    //         }
+    //     }
+    // },
 
-//webhooks
-// {
-//     method: 'POST',
-//     path: '/my/mywebhook/url',
-//     config: {
-//         handler: function(request, reply) {
-//             var event_json = JSON.parse(request.payload);
-//             console.log("An event has happened: " + event_json);
-//             reply(200);
-//         }
-//     }
-// },
-
-// {
-//     method: 'GET',
-//     path: '/my/mywebhook/url',
-//     config: {
-//         handler: function(request, reply) {
-//             console.log("something has happened");
-//             reply(200);
-//         }
-//     }
-// },
-
+    // {
+    //     method: 'GET',
+    //     path: '/my/mywebhook/url',
+    //     config: {
+    //         handler: function(request, reply) {
+    //             console.log("something has happened");
+    //             reply(200);
+    //         }
+    //     }
+    // },
 
 ];

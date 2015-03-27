@@ -2,11 +2,13 @@ extend layout
 
 block content
 	h1 Profile page
-	.profilepicture 
-		img(src="#{picture}" height="250" width="250")
-	.details
-		p Displayname: #{dname}
-		p Full name: #{first} #{last}
-		p Email: #{email}
-		p 
-			a(href='#{link}') Google+
+	.panel.panel-primary
+		.panel.panel-body
+			.profilepicture 
+				img(src="#{picture}" height="250" width="250")
+			.details
+				p Displayname: #{dname}
+				p Full name: #{first} #{last}
+				p Email: #{email}
+				p 
+					a(href='#{link}') Google+

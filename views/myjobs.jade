@@ -3,6 +3,7 @@ extend layout
 block content
 	if jobs
 		each job in jobs
+			h1 My Jobs
 			.panel.panel-primary
 				.panel-heading Title: #{job.title} | Price: #{job.price} | Date: #{job.dateAdded}
 				.panel-body #{job.summary}

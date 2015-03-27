@@ -162,6 +162,20 @@ function updateJob(id, object, callback) {
 	});
 }
 
+function updateToken(id, token, callback) {
+	db.jobs.findAndModify({
+		query: {_id: id},
+		update: {$set: {token: token } }
+	}, function(err, data) {
+		if (err) {
+			return callback(err, null);
+		}
+		else {
+			return callback(null, data);
+		}
+	});
+}
+
 
 
 function token(stripetoken, dateAdded) {
@@ -196,6 +210,7 @@ function getToken(callback) {
 }
 
 module.exports = {
+	updateToken: updateToken,
 	updateJob: updateJob,
 	getOneJob: getOneJob,
 	addPhotographerDetails: addPhotographerDetails,
