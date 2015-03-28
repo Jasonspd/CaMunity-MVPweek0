@@ -90,3 +90,10 @@ Below is our first draft timetable for this week:
 
 #### Friday
 * Make final amendments, ensure tests are passing and all code is understood.
+
+-----
+## Team
+
+* Amil Vasishtha: https://github.com/amilvasishtha
+* David Beech: https://github.com/beechware
+* Jason Luu: https://github.com/Jasonspd
