@@ -2,6 +2,26 @@
 
 ------
 
+#Running the App
+
+###Welcome to our **AWESOME** app!
+
+In order to run the app please follow these steps:
+
+* Clone our project using the  ```git clone https://github.com/Jasonspd/CaMunity-MVPweek0.git```
+
+* In your terminal run ```npm install```
+
+* Then please gitter us (Amil, Dave or Jason) for the ```creds.json``` file
+
+* Now you can run ```node app``` in your terminal
+
+* Please note: in order to run tests you will need to install ```lab``` globally: in your terminal run the following command: ```npm install -g lab```
+
+* Now you can run tests using the ```npm test``` command; alternatively you can run ```gulp```
+
+------
+
 ## About the project
 
 Our aim is to set up a platform where photographers can find work, or where clients can find photographers to do some work, in a few simple steps.
@@ -70,3 +90,10 @@ Below is our first draft timetable for this week:
 
 #### Friday
 * Make final amendments, ensure tests are passing and all code is understood.
+
+-----
+## Team
+
+* Amil Vasishtha: https://github.com/amilvasishtha
+* David Beech: https://github.com/beechware
+* Jason Luu: https://github.com/Jasonspd
